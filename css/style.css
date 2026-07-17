@@ -1,0 +1,20 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: #1a1410;
+  color: #fdf6e3;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
