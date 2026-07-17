@@ -1,6 +1,7 @@
 import { WORLD_WIDTH, WORLD_HEIGHT } from '../core/config.js';
 import { isKeyDown } from '../core/input.js';
 import { CONCEPTS } from '../data/concepts.js';
+import { setWalking } from '../core/audioEngine.js';
 
 const NODE_BLOCK_HALF_SIZE = 50; // blocks a 100x100 square centered on each node's ground point
 const goatImage = new Image();
@@ -42,6 +43,8 @@ export function updateGoat(deltaSeconds) {
   if (isKeyDown('ArrowDown'))  dy += 1;
 
   const moving = dx !== 0 || dy !== 0;
+  setWalking(moving);
+
 
   if (moving) {
     const length = Math.sqrt(dx * dx + dy * dy);

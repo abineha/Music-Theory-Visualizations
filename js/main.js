@@ -1,18 +1,20 @@
 import { drawBackground, drawNodes, isMapReady } from './map/mapScene.js';
 import { updateGoat, drawGoat, isGoatReady, goat } from './map/goat.js';
 import { getCamera } from './map/camera.js';
-import { findNearestNodeInRange } from './map/nodes.js';
+import { findNearestNodeInRange, PROXIMITY_RADIUS } from './map/nodes.js';
 import { openPopup, isPopupOpen } from './popup/popupController.js';
-
+import { initAudio, setVolume, updateProximityTone } from './core/audioEngine.js';
 
 const canvas = document.getElementById('map-canvas');
 const ctx = canvas.getContext('2d');
 const hintText = document.getElementById('hint-text');
 
 const interactPrompt = document.getElementById('interact-prompt');
-const NODE_PROMPT_OFFSET = 160; // screen px above the node's ground point
+const NODE_PROMPT_OFFSET = 160;
 let currentNearbyNode = null;
 
+const startGate = document.getElementById('start-gate');
+let gameStarted = false;
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
@@ -31,7 +33,7 @@ function gameLoop(timestamp) {
   const deltaSeconds = lastTimestamp === null ? 0 : (timestamp - lastTimestamp) / 1000;
   lastTimestamp = timestamp;
 
-  if (!isPopupOpen()) {
+  if (gameStarted && !isPopupOpen()) {
     const moved = updateGoat(deltaSeconds);
     if (moved && !hasMoved) {
       hasMoved = true;
@@ -52,8 +54,14 @@ function gameLoop(timestamp) {
     interactPrompt.style.left = `${screenX}px`;
     interactPrompt.style.top = `${screenY}px`;
     interactPrompt.classList.remove('hidden');
+
+    const dx = currentNearbyNode.mapNode.x - goat.x;
+    const dy = currentNearbyNode.mapNode.y - goat.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    updateProximityTone(1 - Math.min(distance / PROXIMITY_RADIUS, 1));
   } else {
     interactPrompt.classList.add('hidden');
+    updateProximityTone(0);
   }
 
   if (isMapReady()) {
@@ -71,16 +79,16 @@ function gameLoop(timestamp) {
 
 requestAnimationFrame(gameLoop);
 
-window.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    if (!isPopupOpen() && currentNearbyNode) {
-      openPopup(currentNearbyNode);
-    }
-  }
-});
+async function handleStart() {
+  await initAudio();
+  setVolume(getEffectiveVolume());
+  startGate.classList.add('hidden');
+  gameStarted = true;
+  typeDialogue('The goat wakes up and looks out across the hills...');
+}
 
-
+startGate.addEventListener('click', handleStart);
+window.addEventListener('keydown', handleStart, { once: true });
 
 // --- HUD: volume + mute ---
 const muteButton = document.getElementById('mute-button');
@@ -113,13 +121,13 @@ function updateVolumeUI() {
     ? 'assets/images/icons/mute.svg'
     : 'assets/images/icons/unmute.svg';
   muteButton.setAttribute('aria-label', effectivelyMuted ? 'Unmute' : 'Mute');
+  setVolume(getEffectiveVolume());
 }
 
-// Layer 6's AudioEngine will read this to scale all playback volume.
+// Layer 6's AudioEngine reads this to scale all playback volume.
 export function getEffectiveVolume() {
   return (isMuted ? 0 : volume) / 100;
 }
-
 
 // --- HUD: dialogue box, word-by-word reveal ---
 const dialogueBox = document.getElementById('dialogue-box');
@@ -133,5 +141,3 @@ function typeDialogue(text, wordDelayMs = 220) {
     }, i * wordDelayMs);
   });
 }
-
-typeDialogue('The goat wakes up and looks out across the hills...');

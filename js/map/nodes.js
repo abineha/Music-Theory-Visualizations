@@ -1,6 +1,6 @@
 import { CONCEPTS } from '../data/concepts.js';
 
-const PROXIMITY_RADIUS = 260; // world units — larger than a node's collision box, so the prompt appears before the goat is physically blocked
+export const PROXIMITY_RADIUS = 260; // world units — larger than a node's collision box, so the prompt appears before the goat is physically blocked
 
 export function findNearestNodeInRange(goatX, goatY) {
   let nearest = null;
