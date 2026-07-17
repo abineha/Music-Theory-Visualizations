@@ -1,4 +1,5 @@
 import { WORLD_WIDTH, WORLD_HEIGHT } from './core/config.js';
+import { drawMap, isMapReady } from './map/mapScene.js';
 
 const canvas = document.getElementById('map-canvas');
 const ctx = canvas.getContext('2d');
@@ -8,22 +9,31 @@ function resizeCanvas() {
   canvas.width = window.innerWidth * dpr;
   canvas.height = window.innerHeight * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  drawPlaceholder();
-}
-
-function drawPlaceholder() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  ctx.fillStyle = '#7fae5c';
-  ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = '#fdf6e3';
-  ctx.font = '20px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('world map goes here — Layer 2', w / 2, h / 2);
 }
 
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+// Temporary fixed camera, anchored on the Foundations biome.
+// Layer 4 replaces this with a camera that follows the goat.
+function gameLoop() {
+  const viewWidth = window.innerWidth;
+  const viewHeight = window.innerHeight;
+  const cameraX = clamp(0, 0, WORLD_WIDTH - viewWidth);
+  const cameraY = clamp(WORLD_HEIGHT / 2 - viewHeight / 2, 0, WORLD_HEIGHT - viewHeight);
+
+  if (isMapReady()) {
+    drawMap(ctx, cameraX, cameraY, viewWidth, viewHeight);
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);
 
 // --- HUD: volume + mute ---
 const muteButton = document.getElementById('mute-button');
