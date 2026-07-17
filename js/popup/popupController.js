@@ -9,6 +9,7 @@ import { renderStaircaseToy } from './toys/staircaseToy.js';
 import { renderWheelToy } from './toys/wheelToy.js';
 import { renderStackingToy } from './toys/stackingToy.js';
 import { renderComposerToy } from './toys/composerToy.js';
+import { renderQuiz } from './quiz.js';
 
 
 const overlay = document.getElementById('popup-overlay');
@@ -18,6 +19,7 @@ const closeButton = document.getElementById('popup-close');
 const tabs = document.querySelectorAll('.popup-tab');
 const panels = document.querySelectorAll('.popup-panel-body');
 const toyContainer = document.getElementById('toy-container');
+const quizContainer = document.getElementById('quiz-container');
 
 let open = false;
 
@@ -85,6 +87,7 @@ export function openPopup(concept) {
   renderNotation(concept);
   renderInstrument(concept);
   renderToy(concept);
+  renderQuiz(quizContainer, concept);
   overlay.classList.remove('hidden');
   open = true;
   setActiveSection('toy'); // kids always start on the interactive toy
