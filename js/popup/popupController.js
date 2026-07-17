@@ -1,4 +1,5 @@
 import { duckBacktrack, restoreBacktrack, setWalking } from '../core/audioEngine.js';
+import { renderNotation } from './notation.js';
 
 const overlay = document.getElementById('popup-overlay');
 const titleEl = document.getElementById('popup-title');
@@ -31,6 +32,7 @@ tabs.forEach((tab) => {
 export function openPopup(concept) {
   titleEl.textContent = concept.title;
   definitionEl.textContent = concept.definition;
+  renderNotation(concept);
   overlay.classList.remove('hidden');
   open = true;
   setActiveSection('toy'); // kids always start on the interactive toy
