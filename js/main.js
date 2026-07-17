@@ -90,6 +90,15 @@ async function handleStart() {
 startGate.addEventListener('click', handleStart);
 window.addEventListener('keydown', handleStart, { once: true });
 
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!isPopupOpen() && currentNearbyNode) {
+      openPopup(currentNearbyNode);
+    }
+  }
+});
+
 // --- HUD: volume + mute ---
 const muteButton = document.getElementById('mute-button');
 const muteIcon = document.getElementById('mute-icon');
