@@ -1,4 +1,5 @@
 import { drawBackground, drawNodes, isMapReady } from './map/mapScene.js';
+import { getSectionAtX } from './core/config.js';
 import { updateGoat, drawGoat, isGoatReady, goat } from './map/goat.js';
 import { getCamera } from './map/camera.js';
 import { findNearestNodeInRange, PROXIMITY_RADIUS } from './map/nodes.js';
@@ -29,6 +30,13 @@ resizeCanvas();
 
 let lastTimestamp = null;
 let hasMoved = false;
+const SECTION_DIALOGUE = {
+  foundations: 'The goat wanders through the Foundations meadow...',
+  melody: 'The goat steps into the golden fields of Melody...',
+  harmony: 'The goat climbs into the misty hills of Harmony...',
+};
+let lastSection = null;
+
 
 function gameLoop(timestamp) {
   const deltaSeconds = lastTimestamp === null ? 0 : (timestamp - lastTimestamp) / 1000;
@@ -41,6 +49,14 @@ function gameLoop(timestamp) {
       hintText.classList.add('hidden');
     }
     currentNearbyNode = findNearestNodeInRange(goat.x, goat.y);
+    const currentSection = getSectionAtX(goat.x);
+    if (currentSection !== lastSection) {
+      if (lastSection !== null) {
+        typeDialogue(SECTION_DIALOGUE[currentSection]);
+      }
+      lastSection = currentSection;
+    }
+
   } else {
     currentNearbyNode = null;
   }

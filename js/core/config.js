@@ -6,3 +6,9 @@ export const WORLD_HEIGHT = 1800;
 // reveal more of the world; nothing is letterboxed or stretched.
 export const REFERENCE_VIEWPORT_WIDTH = 1600;
 export const REFERENCE_VIEWPORT_HEIGHT = 900;
+
+export function getSectionAtX(x) {
+  if (x < WORLD_WIDTH / 3) return 'foundations';
+  if (x < (WORLD_WIDTH / 3) * 2) return 'melody';
+  return 'harmony';
+}

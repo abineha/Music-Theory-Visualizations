@@ -10,12 +10,16 @@ goatImage.src = 'assets/images/goat.svg';
 const GOAT_WIDTH = 90;   // matches the "goat = ~90 units tall" sizing ruler from planning
 const GOAT_HEIGHT = 99;  // goat.svg is 100x110 — keep that aspect ratio
 const SPEED = 400;       // world units per second
+const BOB_AMPLITUDE = 4; // px of vertical bob while walking
+const BOB_SPEED = 10;    // radians per second — how fast the bob cycles
 
 export const goat = {
   x: WORLD_WIDTH * 0.15,  // spawns inside the Foundations biome
   y: WORLD_HEIGHT / 2,
   facing: 'right',
+  bobPhase: 0,
 };
+
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -47,6 +51,8 @@ export function updateGoat(deltaSeconds) {
 
 
   if (moving) {
+    goat.bobPhase += deltaSeconds * BOB_SPEED;
+
     const length = Math.sqrt(dx * dx + dy * dy);
     dx /= length; // normalize so diagonal movement isn't faster than straight movement
     dy /= length;
@@ -54,28 +60,30 @@ export function updateGoat(deltaSeconds) {
     const nextX = clamp(goat.x + dx * SPEED * deltaSeconds, GOAT_WIDTH / 2, WORLD_WIDTH - GOAT_WIDTH / 2);
     const nextY = clamp(goat.y + dy * SPEED * deltaSeconds, GOAT_HEIGHT / 2, WORLD_HEIGHT - GOAT_HEIGHT / 2);
 
-    // resolve X and Y separately so the goat slides along a blocked node instead of getting stuck
     if (!collidesWithNode(nextX, goat.y)) {
       goat.x = nextX;
     }
     if (!collidesWithNode(goat.x, nextY)) {
       goat.y = nextY;
     }
-    
+
     if (dx < 0) goat.facing = 'left';
     else if (dx > 0) goat.facing = 'right';
+  } else {
+    goat.bobPhase = 0;
   }
+
 
   return moving;
 }
 
 export function drawGoat(ctx, cameraX, cameraY) {
   const screenX = goat.x - cameraX;
-  const screenY = goat.y - cameraY;
+  const bobOffset = Math.sin(goat.bobPhase) * BOB_AMPLITUDE;
+  const screenY = goat.y - cameraY + bobOffset;
 
   ctx.save();
   if (goat.facing === 'left') {
-    // mirror the single placeholder sprite around the goat's own center
     ctx.translate(screenX, screenY);
     ctx.scale(-1, 1);
     ctx.drawImage(goatImage, -GOAT_WIDTH / 2, -GOAT_HEIGHT / 2, GOAT_WIDTH, GOAT_HEIGHT);
@@ -84,6 +92,7 @@ export function drawGoat(ctx, cameraX, cameraY) {
   }
   ctx.restore();
 }
+
 
 export function isGoatReady() {
   return goatImage.complete;
