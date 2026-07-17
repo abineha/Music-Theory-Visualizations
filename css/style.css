@@ -129,3 +129,90 @@ html, body {
   border: 2px solid #3a2a1a;
   cursor: pointer;
 }
+
+.interact-prompt {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  padding: 8px 16px;
+  background: rgba(244, 201, 93, 0.9);
+  color: #2a1f18;
+  font-weight: bold;
+  border-radius: 20px;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.interact-prompt.hidden {
+  opacity: 0;
+}
+
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 6, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: opacity 0.2s ease;
+}
+
+.popup-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.popup-panel {
+  position: relative;
+  width: min(700px, 90vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #2a1f18;
+  border: 3px solid #f4c95d;
+  border-radius: 16px;
+  padding: 24px 28px;
+  color: #fdf6e3;
+}
+
+.popup-close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #f4c95d;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fdf6e3;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.popup-title {
+  text-align: center;
+  color: #f4c95d;
+  margin-bottom: 20px;
+}
+
+.popup-section {
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(244, 201, 93, 0.25);
+}
+
+.popup-section:last-child {
+  border-bottom: none;
+}
+
+.popup-section h3 {
+  font-size: 0.95rem;
+  color: #f4c95d;
+  margin-bottom: 8px;
+}
+
+.popup-section-body {
+  font-size: 0.9rem;
+  opacity: 0.75;
+  font-style: italic;
+}

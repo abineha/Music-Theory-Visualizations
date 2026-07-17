@@ -1,10 +1,18 @@
 import { drawBackground, drawNodes, isMapReady } from './map/mapScene.js';
 import { updateGoat, drawGoat, isGoatReady, goat } from './map/goat.js';
 import { getCamera } from './map/camera.js';
+import { findNearestNodeInRange } from './map/nodes.js';
+import { openPopup, isPopupOpen } from './popup/popupController.js';
+
 
 const canvas = document.getElementById('map-canvas');
 const ctx = canvas.getContext('2d');
 const hintText = document.getElementById('hint-text');
+
+const interactPrompt = document.getElementById('interact-prompt');
+const NODE_PROMPT_OFFSET = 160; // screen px above the node's ground point
+let currentNearbyNode = null;
+
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
@@ -23,17 +31,32 @@ function gameLoop(timestamp) {
   const deltaSeconds = lastTimestamp === null ? 0 : (timestamp - lastTimestamp) / 1000;
   lastTimestamp = timestamp;
 
-  const moved = updateGoat(deltaSeconds);
-  if (moved && !hasMoved) {
-    hasMoved = true;
-    hintText.classList.add('hidden');
+  if (!isPopupOpen()) {
+    const moved = updateGoat(deltaSeconds);
+    if (moved && !hasMoved) {
+      hasMoved = true;
+      hintText.classList.add('hidden');
+    }
+    currentNearbyNode = findNearestNodeInRange(goat.x, goat.y);
+  } else {
+    currentNearbyNode = null;
   }
 
   const viewWidth = window.innerWidth;
   const viewHeight = window.innerHeight;
   const { cameraX, cameraY } = getCamera(goat.x, goat.y, viewWidth, viewHeight);
 
-    if (isMapReady()) {
+  if (currentNearbyNode) {
+    const screenX = currentNearbyNode.mapNode.x - cameraX;
+    const screenY = currentNearbyNode.mapNode.y - cameraY - NODE_PROMPT_OFFSET;
+    interactPrompt.style.left = `${screenX}px`;
+    interactPrompt.style.top = `${screenY}px`;
+    interactPrompt.classList.remove('hidden');
+  } else {
+    interactPrompt.classList.add('hidden');
+  }
+
+  if (isMapReady()) {
     drawBackground(ctx, cameraX, cameraY, viewWidth, viewHeight);
   }
   if (isGoatReady()) {
@@ -43,11 +66,20 @@ function gameLoop(timestamp) {
     drawNodes(ctx, cameraX, cameraY, viewWidth, viewHeight);
   }
 
-
   requestAnimationFrame(gameLoop);
 }
 
 requestAnimationFrame(gameLoop);
+
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!isPopupOpen() && currentNearbyNode) {
+      openPopup(currentNearbyNode);
+    }
+  }
+});
+
 
 
 // --- HUD: volume + mute ---
