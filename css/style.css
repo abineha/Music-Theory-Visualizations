@@ -280,3 +280,70 @@ html, body {
   margin-bottom: 12px;
   text-shadow: 2px 2px 0 #3a2a1a;
 }
+
+.keyboard {
+  display: flex;
+  height: 140px;
+}
+
+.key {
+  position: relative;
+  border: 1px solid #2a1f18;
+  cursor: pointer;
+  padding: 0;
+}
+
+.key-white {
+  width: 40px;
+  height: 140px;
+  background: #fdf6e3;
+  border-radius: 0 0 4px 4px;
+  z-index: 1;
+}
+
+.key-white:active {
+  background: #e8d27a;
+}
+
+.key-black {
+  position: absolute;
+  top: 0;
+  right: -12px;
+  width: 24px;
+  height: 88px;
+  background: #2a1f18;
+  border-radius: 0 0 3px 3px;
+  z-index: 2;
+}
+
+.key-black:active {
+  background: #4a3a2a;
+}
+
+.key-highlight.key-white {
+  background: #f4c95d;
+}
+
+.key-highlight.key-black {
+  background: #b8863f;
+}
+
+.drum-pads {
+  display: flex;
+  gap: 16px;
+}
+
+.drum-pad {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  border: 2px solid #f4c95d;
+  background: #6b4a2f;
+  color: #fdf6e3;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.drum-pad:active {
+  background: #8a6242;
+}

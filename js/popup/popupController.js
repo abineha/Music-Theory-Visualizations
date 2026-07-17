@@ -1,5 +1,8 @@
-import { duckBacktrack, restoreBacktrack, setWalking } from '../core/audioEngine.js';
+import { duckBacktrack, restoreBacktrack, setWalking, pauseBaa, resumeBaa } from '../core/audioEngine.js';
 import { renderNotation } from './notation.js';
+import { renderKeyboard } from './instruments/keyboard.js';
+import { renderDrumPad } from './instruments/drumPad.js';
+
 
 const overlay = document.getElementById('popup-overlay');
 const titleEl = document.getElementById('popup-title');
@@ -29,20 +32,37 @@ tabs.forEach((tab) => {
   });
 });
 
+const instrumentContainer = document.getElementById('instrument-container');
+
+function renderInstrument(concept) {
+  if (!concept.instrument) {
+    instrumentContainer.innerHTML = 'No instrument for this concept yet.';
+    return;
+  }
+  if (concept.instrument.type === 'keyboard') {
+    renderKeyboard(instrumentContainer, concept.instrument);
+  } else if (concept.instrument.type === 'drumpad') {
+    renderDrumPad(instrumentContainer);
+  }
+}
+
 export function openPopup(concept) {
   titleEl.textContent = concept.title;
   definitionEl.textContent = concept.definition;
   renderNotation(concept);
+  renderInstrument(concept);
   overlay.classList.remove('hidden');
   open = true;
   setActiveSection('toy'); // kids always start on the interactive toy
   setWalking(false);
+  pauseBaa();
   duckBacktrack();
 }
 
 export function closePopup() {
   overlay.classList.add('hidden');
   open = false;
+  resumeBaa();
   restoreBacktrack();
 }
 

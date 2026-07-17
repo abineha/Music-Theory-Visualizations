@@ -18,9 +18,19 @@ stepPlayer.volume.value = EFFECT_VOLUME;
 const proximityOsc = new Tone.Oscillator({ type: 'sine', frequency: 220 }).toDestination();
 proximityOsc.volume.value = -100; // effectively silent until started
 
+const keyboardSynth = new Tone.PolySynth(Tone.Synth).toDestination();
+keyboardSynth.volume.value = -6;
+
+const drumLow = new Tone.MembraneSynth().toDestination();
+drumLow.volume.value = -6;
+
+const drumHigh = new Tone.MetalSynth().toDestination();
+drumHigh.volume.value = -12;
+
 let audioReady = false;
 let proximityPlaying = false;
 let stepPlaying = false;
+let baaPaused = false;
 
 function safeStart(player) {
   if (!player.loaded) return;
@@ -68,8 +78,16 @@ export function restoreBacktrack() {
 }
 
 export function playBaa() {
-  if (!audioReady) return;
+  if (!audioReady || baaPaused) return;
   safeStart(baaPlayer);
+}
+
+export function pauseBaa() {
+  baaPaused = true;
+}
+
+export function resumeBaa() {
+  baaPaused = false;
 }
 
 export function setWalking(isWalking) {
@@ -102,4 +120,18 @@ export function updateProximityTone(proximityRatio) {
 
   proximityOsc.frequency.value = 220 + proximityRatio * 220;
   proximityOsc.volume.value = -30 + proximityRatio * 20;
+}
+
+export function playInstrumentNote(note) {
+  if (!audioReady) return;
+  keyboardSynth.triggerAttackRelease(note, '8n');
+}
+
+export function playDrumHit(padId) {
+  if (!audioReady) return;
+  if (padId === 'low') {
+    drumLow.triggerAttackRelease('C2', '8n');
+  } else {
+    drumHigh.triggerAttackRelease('16n');
+  }
 }
