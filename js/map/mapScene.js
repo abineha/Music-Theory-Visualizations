@@ -12,13 +12,15 @@ export function isMapReady() {
   return backgroundImage.complete && nodeMarkerImage.complete;
 }
 
-export function drawMap(ctx, cameraX, cameraY, viewWidth, viewHeight) {
+export function drawBackground(ctx, cameraX, cameraY, viewWidth, viewHeight) {
   ctx.drawImage(
     backgroundImage,
     cameraX, cameraY, viewWidth, viewHeight,
     0, 0, viewWidth, viewHeight
   );
+}
 
+export function drawNodes(ctx, cameraX, cameraY, viewWidth, viewHeight) {
   for (const concept of CONCEPTS) {
     const { x, y } = concept.mapNode;
     const screenX = x - cameraX;
@@ -26,7 +28,7 @@ export function drawMap(ctx, cameraX, cameraY, viewWidth, viewHeight) {
 
     if (screenX < -NODE_MARKER_SIZE || screenX > viewWidth + NODE_MARKER_SIZE ||
         screenY < -NODE_MARKER_SIZE || screenY > viewHeight + NODE_MARKER_SIZE) {
-      continue; // cheap off-screen culling
+      continue;
     }
 
     ctx.drawImage(
@@ -43,3 +45,4 @@ export function drawMap(ctx, cameraX, cameraY, viewWidth, viewHeight) {
     ctx.fillText(concept.title, screenX, screenY + 20);
   }
 }
+

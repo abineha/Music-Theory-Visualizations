@@ -1,6 +1,8 @@
 import { WORLD_WIDTH, WORLD_HEIGHT } from '../core/config.js';
 import { isKeyDown } from '../core/input.js';
+import { CONCEPTS } from '../data/concepts.js';
 
+const NODE_BLOCK_HALF_SIZE = 50; // blocks a 100x100 square centered on each node's ground point
 const goatImage = new Image();
 goatImage.src = 'assets/images/goat.svg';
 
@@ -16,6 +18,18 @@ export const goat = {
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function collidesWithNode(x, y) {
+  for (const concept of CONCEPTS) {
+    const nx = concept.mapNode.x;
+    const ny = concept.mapNode.y;
+    if (Math.abs(x - nx) < NODE_BLOCK_HALF_SIZE + GOAT_WIDTH / 2 &&
+        Math.abs(y - ny) < NODE_BLOCK_HALF_SIZE + GOAT_HEIGHT / 2) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function updateGoat(deltaSeconds) {
@@ -34,9 +48,17 @@ export function updateGoat(deltaSeconds) {
     dx /= length; // normalize so diagonal movement isn't faster than straight movement
     dy /= length;
 
-    goat.x = clamp(goat.x + dx * SPEED * deltaSeconds, GOAT_WIDTH / 2, WORLD_WIDTH - GOAT_WIDTH / 2);
-    goat.y = clamp(goat.y + dy * SPEED * deltaSeconds, GOAT_HEIGHT / 2, WORLD_HEIGHT - GOAT_HEIGHT / 2);
+    const nextX = clamp(goat.x + dx * SPEED * deltaSeconds, GOAT_WIDTH / 2, WORLD_WIDTH - GOAT_WIDTH / 2);
+    const nextY = clamp(goat.y + dy * SPEED * deltaSeconds, GOAT_HEIGHT / 2, WORLD_HEIGHT - GOAT_HEIGHT / 2);
 
+    // resolve X and Y separately so the goat slides along a blocked node instead of getting stuck
+    if (!collidesWithNode(nextX, goat.y)) {
+      goat.x = nextX;
+    }
+    if (!collidesWithNode(goat.x, nextY)) {
+      goat.y = nextY;
+    }
+    
     if (dx < 0) goat.facing = 'left';
     else if (dx > 0) goat.facing = 'right';
   }
