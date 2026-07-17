@@ -9,7 +9,21 @@
 <body>
 
   <div id="app">
-    <!-- screens will go here in later layers -->
+    <div id="home-screen" class="screen">
+      <canvas id="map-canvas"></canvas>
+
+      <div id="dialogue-box" class="dialogue-box"></div>
+
+      <div id="hint-text" class="hint-text">Use arrow keys to explore. Click on nodes to learn!</div>
+
+      <div class="volume-control">
+        <button id="mute-button" class="hud-button" aria-label="Mute">
+          <img src="assets/images/icons/unmute.svg" alt="" id="mute-icon">
+        </button>
+        <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="80" aria-label="Volume">
+      </div>
+
+    </div>
   </div>
 
   <script type="module" src="js/main.js"></script>

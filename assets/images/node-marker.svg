@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <!-- PLACEHOLDER — generic "this is clickable" marker shared by all 17 nodes for now (node size = ~1.5-2x goat height). Later, either replace this per-concept with a custom hand-drawn icon at the same viewBox, or keep this glow/post as a shared base and layer a concept icon on top of it. -->
+  <circle cx="80" cy="80" r="60" fill="#f4c95d" opacity="0.25"/>
+  <circle cx="80" cy="90" r="34" fill="#6b4a2f" stroke="#3a2a1a" stroke-width="4"/>
+  <rect x="74" y="20" width="12" height="60" fill="#6b4a2f" stroke="#3a2a1a" stroke-width="3"/>
+  <circle cx="80" cy="90" r="14" fill="#fdf6e3"/>
+</svg>

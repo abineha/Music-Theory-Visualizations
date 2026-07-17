@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4800 1800">
+  <!-- PLACEHOLDER WORLD MAP — replace with a hand-drawn Fresco export at 4800x1800 (or any size with this aspect ratio). Three bands = Foundations / Melody / Harmony biomes, left to right, matching concepts.js "section" field. -->
+  <rect x="0" y="0" width="1600" height="1800" fill="#8fbf6e"/>
+  <rect x="1600" y="0" width="1600" height="1800" fill="#e8d27a"/>
+  <rect x="3200" y="0" width="1600" height="1800" fill="#c79bd6"/>
+
+  <rect x="1550" y="0" width="100" height="1800" fill="#e8d27a" opacity="0.35"/>
+  <rect x="3150" y="0" width="100" height="1800" fill="#c79bd6" opacity="0.35"/>
+
+  <g fill="#5a8a3f">
+    <circle cx="250" cy="300" r="70"/>
+    <circle cx="900" cy="1400" r="60"/>
+    <circle cx="1350" cy="600" r="65"/>
+    <circle cx="2100" cy="1200" r="55"/>
+    <circle cx="2700" cy="400" r="60"/>
+    <circle cx="3500" cy="900" r="65"/>
+    <circle cx="4200" cy="1450" r="55"/>
+    <circle cx="4500" cy="500" r="60"/>
+  </g>
+
+  <g fill="#7a6a55" opacity="0.6">
+    <ellipse cx="600" cy="900" rx="40" ry="22"/>
+    <ellipse cx="1800" cy="1500" rx="45" ry="24"/>
+    <ellipse cx="2500" cy="700" rx="38" ry="20"/>
+    <ellipse cx="3800" cy="1300" rx="42" ry="22"/>
+  </g>
+</svg>
