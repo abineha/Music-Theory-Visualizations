@@ -122,10 +122,11 @@ export function updateProximityTone(proximityRatio) {
   proximityOsc.volume.value = -30 + proximityRatio * 20;
 }
 
-export function playInstrumentNote(note) {
+export function playInstrumentNote(note, velocity = 1) {
   if (!audioReady) return;
-  keyboardSynth.triggerAttackRelease(note, '8n');
+  keyboardSynth.triggerAttackRelease(note, '8n', undefined, velocity);
 }
+
 
 export function playDrumHit(padId) {
   if (!audioReady) return;

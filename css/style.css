@@ -347,3 +347,72 @@ html, body {
 .drum-pad:active {
   background: #8a6242;
 }
+
+.toy-label {
+  font-size: 1rem;
+  margin-bottom: 16px;
+}
+
+.toy-slider-wrapper,
+.toy-tap-wrapper,
+.toy-demo-wrapper {
+  text-align: center;
+  padding-top: 20px;
+}
+
+.toy-slider {
+  width: 100%;
+  max-width: 400px;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 4px;
+  background: #6b4a2f;
+  outline: none;
+  cursor: pointer;
+}
+
+.toy-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f4c95d;
+  border: 3px solid #3a2a1a;
+  cursor: pointer;
+}
+
+.toy-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f4c95d;
+  border: 3px solid #3a2a1a;
+  cursor: pointer;
+}
+
+.toy-bpm-readout {
+  font-size: 1.6rem;
+  color: #f4c95d;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.toy-tap-button,
+.toy-play-button {
+  padding: 16px 32px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 12px;
+  border: 2px solid #f4c95d;
+  background: #6b4a2f;
+  color: #fdf6e3;
+  cursor: pointer;
+}
+
+.toy-tap-button:active,
+.toy-play-button:active {
+  background: #8a6242;
+}
+

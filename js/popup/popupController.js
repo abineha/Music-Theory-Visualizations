@@ -2,6 +2,9 @@ import { duckBacktrack, restoreBacktrack, setWalking, pauseBaa, resumeBaa } from
 import { renderNotation } from './notation.js';
 import { renderKeyboard } from './instruments/keyboard.js';
 import { renderDrumPad } from './instruments/drumPad.js';
+import { renderSliderToy } from './toys/sliderToy.js';
+import { renderTapToy } from './toys/tapToy.js';
+import { renderKeyboardHighlightToy } from './toys/keyboardHighlightToy.js';
 
 
 const overlay = document.getElementById('popup-overlay');
@@ -10,6 +13,7 @@ const definitionEl = document.getElementById('popup-definition');
 const closeButton = document.getElementById('popup-close');
 const tabs = document.querySelectorAll('.popup-tab');
 const panels = document.querySelectorAll('.popup-panel-body');
+const toyContainer = document.getElementById('toy-container');
 
 let open = false;
 
@@ -46,11 +50,29 @@ function renderInstrument(concept) {
   }
 }
 
+function renderToy(concept) {
+  if (!concept.toy) {
+    toyContainer.innerHTML = 'No toy for this concept yet.';
+    return;
+  }
+  const { type, config } = concept.toy;
+  if (type === 'slider-toy') {
+    renderSliderToy(toyContainer, config);
+  } else if (type === 'tap-toy') {
+    renderTapToy(toyContainer, config);
+  } else if (type === 'keyboard-highlight-toy') {
+    renderKeyboardHighlightToy(toyContainer, config);
+  } else {
+    toyContainer.innerHTML = 'No toy for this concept yet.';
+  }
+}
+
 export function openPopup(concept) {
   titleEl.textContent = concept.title;
   definitionEl.textContent = concept.definition;
   renderNotation(concept);
   renderInstrument(concept);
+  renderToy(concept);
   overlay.classList.remove('hidden');
   open = true;
   setActiveSection('toy'); // kids always start on the interactive toy
