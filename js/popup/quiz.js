@@ -1,4 +1,5 @@
-import { playInstrumentNote } from '../core/audioEngine.js';
+import { playInstrumentNote, playDrumHit } from '../core/audioEngine.js';
+
 
 export function renderQuiz(container, concept) {
   container.innerHTML = '';
@@ -12,9 +13,14 @@ export function renderQuiz(container, concept) {
 
   if (type === 'multiple-choice-text' || type === 'ear-training') {
     renderChoiceQuiz(container, config, type === 'ear-training');
+  } else if (type === 'tap-the-beat') {
+    renderTapTheBeatQuiz(container, config);
+  } else if (type === 'listen-and-order') {
+    renderListenAndOrderQuiz(container, config);
   } else {
     container.textContent = 'No quiz for this concept yet.';
   }
+
 }
 
 function renderChoiceQuiz(container, config, playable) {
@@ -65,3 +71,121 @@ function renderChoiceQuiz(container, config, playable) {
   wrapper.appendChild(feedbackEl);
   container.appendChild(wrapper);
 }
+
+function renderTapTheBeatQuiz(container, config) {
+  const { label = 'Tap along with the beat!', targetBpm = 100, tapsRequired = 4 } = config;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'quiz-wrapper';
+
+  const labelEl = document.createElement('p');
+  labelEl.className = 'quiz-question';
+  labelEl.textContent = label;
+  wrapper.appendChild(labelEl);
+
+  const tapButton = document.createElement('button');
+  tapButton.type = 'button';
+  tapButton.className = 'toy-tap-button';
+  tapButton.textContent = 'Tap';
+  wrapper.appendChild(tapButton);
+
+  const feedbackEl = document.createElement('p');
+  feedbackEl.className = 'quiz-feedback';
+  wrapper.appendChild(feedbackEl);
+
+  const tapTimes = [];
+  const targetIntervalMs = 60000 / targetBpm;
+
+  tapButton.addEventListener('click', () => {
+    playDrumHit('low');
+    tapTimes.push(performance.now());
+    if (tapTimes.length >= tapsRequired) {
+      const intervals = [];
+      for (let i = 1; i < tapTimes.length; i++) intervals.push(tapTimes[i] - tapTimes[i - 1]);
+      const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      const diff = Math.abs(avg - targetIntervalMs);
+      const correct = diff < targetIntervalMs * 0.3;
+      feedbackEl.textContent = correct ? 'Great timing!' : 'Try to keep a steadier beat — tap again!';
+      feedbackEl.className = 'quiz-feedback ' + (correct ? 'correct' : 'incorrect');
+      tapTimes.length = 0;
+    }
+  });
+
+  container.appendChild(wrapper);
+}
+
+function renderListenAndOrderQuiz(container, config) {
+  const { label = 'Listen, then put them back in order!', sequence = [] } = config;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'quiz-wrapper';
+
+  const labelEl = document.createElement('p');
+  labelEl.className = 'quiz-question';
+  labelEl.textContent = label;
+  wrapper.appendChild(labelEl);
+
+  const playButton = document.createElement('button');
+  playButton.type = 'button';
+  playButton.className = 'toy-play-button';
+  playButton.textContent = '▶ Play the sequence';
+  playButton.addEventListener('click', () => {
+    let delay = 0;
+    sequence.forEach((item) => {
+      item.notes.forEach((note) => setTimeout(() => playInstrumentNote(note), delay));
+      delay += 500;
+    });
+  });
+  wrapper.appendChild(playButton);
+
+  const optionsEl = document.createElement('div');
+  optionsEl.className = 'quiz-options';
+
+  const answerEl = document.createElement('div');
+  answerEl.className = 'quiz-answer-slots';
+
+  const feedbackEl = document.createElement('p');
+  feedbackEl.className = 'quiz-feedback';
+
+  const userOrder = [];
+  const shuffled = [...sequence].sort(() => Math.random() - 0.5);
+
+  shuffled.forEach((item) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'quiz-option';
+    button.textContent = item.label;
+    button.addEventListener('click', () => {
+      if (button.disabled) return;
+      button.disabled = true;
+      button.classList.add('used');
+      userOrder.push(item);
+      item.notes.forEach((note) => playInstrumentNote(note));
+
+      const slot = document.createElement('span');
+      slot.className = 'quiz-answer-slot';
+      slot.textContent = item.label;
+      answerEl.appendChild(slot);
+
+      if (userOrder.length === sequence.length) {
+        const correct = sequence.every((original, i) => original === userOrder[i]);
+        feedbackEl.textContent = correct ? 'Perfect order!' : 'Not quite the right order — try again!';
+        feedbackEl.className = 'quiz-feedback ' + (correct ? 'correct' : 'incorrect');
+      }
+    });
+    optionsEl.appendChild(button);
+  });
+
+  const retryButton = document.createElement('button');
+  retryButton.type = 'button';
+  retryButton.className = 'toy-clear-button';
+  retryButton.textContent = 'Try Again';
+  retryButton.addEventListener('click', () => renderListenAndOrderQuiz(container, config));
+
+  wrapper.appendChild(optionsEl);
+  wrapper.appendChild(answerEl);
+  wrapper.appendChild(feedbackEl);
+  wrapper.appendChild(retryButton);
+  container.appendChild(wrapper);
+}
+
