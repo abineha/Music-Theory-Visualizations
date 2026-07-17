@@ -5,6 +5,10 @@ import { renderDrumPad } from './instruments/drumPad.js';
 import { renderSliderToy } from './toys/sliderToy.js';
 import { renderTapToy } from './toys/tapToy.js';
 import { renderKeyboardHighlightToy } from './toys/keyboardHighlightToy.js';
+import { renderStaircaseToy } from './toys/staircaseToy.js';
+import { renderWheelToy } from './toys/wheelToy.js';
+import { renderStackingToy } from './toys/stackingToy.js';
+import { renderComposerToy } from './toys/composerToy.js';
 
 
 const overlay = document.getElementById('popup-overlay');
@@ -62,6 +66,14 @@ function renderToy(concept) {
     renderTapToy(toyContainer, config);
   } else if (type === 'keyboard-highlight-toy') {
     renderKeyboardHighlightToy(toyContainer, config);
+    } else if (type === 'staircase-toy') {
+    renderStaircaseToy(toyContainer, config);
+  } else if (type === 'wheel-toy') {
+    renderWheelToy(toyContainer, config);
+  } else if (type === 'stacking-toy') {
+    renderStackingToy(toyContainer, config);
+  } else if (type === 'composer-toy') {
+    renderComposerToy(toyContainer, config);
   } else {
     toyContainer.innerHTML = 'No toy for this concept yet.';
   }

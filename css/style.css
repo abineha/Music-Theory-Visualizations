@@ -416,3 +416,159 @@ html, body {
   background: #8a6242;
 }
 
+.toy-stairs {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  justify-content: center;
+  height: 220px;
+}
+
+.toy-stair-step {
+  width: 44px;
+  background: #6b4a2f;
+  border: 2px solid #f4c95d;
+  border-radius: 6px 6px 0 0;
+  color: #fdf6e3;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.toy-stair-step:active {
+  background: #8a6242;
+}
+
+.toy-wheel-wrapper {
+  text-align: center;
+}
+
+.toy-wheel {
+  position: relative;
+  width: 260px;
+  height: 260px;
+  margin: 10px auto;
+  border-radius: 50%;
+  border: 2px dashed rgba(244, 201, 93, 0.4);
+}
+
+.toy-wheel-slot {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid #f4c95d;
+  background: #6b4a2f;
+  color: #fdf6e3;
+  font-weight: bold;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.toy-wheel-slot:active {
+  background: #f4c95d;
+  color: #2a1f18;
+}
+
+.toy-wheel-result {
+  margin-top: 12px;
+  font-size: 1rem;
+  color: #f4c95d;
+  min-height: 1.4em;
+}
+
+.toy-stack-wrapper {
+  text-align: center;
+}
+
+.toy-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 6px;
+  margin: 16px auto;
+}
+
+.toy-stack-block {
+  width: 160px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 2px solid #f4c95d;
+  background: #6b4a2f;
+  color: #fdf6e3;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.toy-stack-block.added {
+  background: #f4c95d;
+  color: #2a1f18;
+}
+
+.toy-composer-wrapper {
+  text-align: center;
+}
+
+.toy-composer-slots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 16px 0;
+}
+
+.toy-composer-slot {
+  width: 36px;
+  height: 36px;
+  border: 2px dashed rgba(244, 201, 93, 0.5);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f4c95d;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.toy-composer-palette {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.toy-composer-note {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  border: 2px solid #f4c95d;
+  background: #6b4a2f;
+  color: #fdf6e3;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.toy-composer-note:active {
+  background: #8a6242;
+}
+
+.toy-composer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.toy-clear-button {
+  padding: 16px 24px;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 2px solid rgba(244, 201, 93, 0.5);
+  background: transparent;
+  color: #fdf6e3;
+  cursor: pointer;
+}
+
