@@ -10,6 +10,7 @@ import { renderWheelToy } from './toys/wheelToy.js';
 import { renderStackingToy } from './toys/stackingToy.js';
 import { renderComposerToy } from './toys/composerToy.js';
 import { renderQuiz } from './quiz.js';
+import { markVisited } from '../core/progress.js';
 
 
 const overlay = document.getElementById('popup-overlay');
@@ -88,6 +89,7 @@ export function openPopup(concept) {
   renderInstrument(concept);
   renderToy(concept);
   renderQuiz(quizContainer, concept);
+  markVisited(concept.id);
   overlay.classList.remove('hidden');
   open = true;
   setActiveSection('toy'); // kids always start on the interactive toy
