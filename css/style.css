@@ -165,13 +165,13 @@ html, body {
 
 .popup-panel {
   position: relative;
-  width: min(700px, 90vw);
-  max-height: 85vh;
-  overflow-y: auto;
+  width: min(1460px, 92vw);
+  height: min(660px, 85vh);
+  display: flex;
   background: #2a1f18;
   border: 3px solid #f4c95d;
   border-radius: 16px;
-  padding: 24px 28px;
+  overflow: hidden;
   color: #fdf6e3;
 }
 
@@ -187,34 +187,69 @@ html, body {
   color: #fdf6e3;
   font-size: 1.2rem;
   cursor: pointer;
+  z-index: 1;
 }
 
-.popup-title {
-  text-align: center;
-  color: #f4c95d;
-  margin-bottom: 20px;
+.popup-sidebar {
+  width: 160px;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  padding: 60px 0 16px;
+  border-right: 2px solid rgba(244, 201, 93, 0.3);
 }
 
-.popup-section {
-  margin-bottom: 18px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid rgba(244, 201, 93, 0.25);
-}
-
-.popup-section:last-child {
-  border-bottom: none;
-}
-
-.popup-section h3 {
-  font-size: 0.95rem;
-  color: #f4c95d;
-  margin-bottom: 8px;
-}
-
-.popup-section-body {
+.popup-tab {
+  background: none;
+  border: none;
+  color: #fdf6e3;
+  opacity: 0.6;
+  text-align: left;
+  padding: 14px 20px;
   font-size: 0.9rem;
-  opacity: 0.75;
-  font-style: italic;
+  cursor: pointer;
+  border-left: 4px solid transparent;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.popup-tab:hover {
+  opacity: 0.85;
+}
+
+.popup-tab.active {
+  opacity: 1;
+  background: rgba(244, 201, 93, 0.15);
+  border-left-color: #f4c95d;
+  font-weight: bold;
+}
+
+.popup-content {
+  flex: 1;
+  padding: 28px 32px;
+  overflow-y: auto;
+}
+
+.popup-panel-body {
+  display: none;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.popup-panel-body.active {
+  display: block;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .start-gate {

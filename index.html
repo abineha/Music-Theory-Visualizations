@@ -28,34 +28,26 @@
       <div id="popup-overlay" class="popup-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popup-title">
         <div class="popup-panel">
           <button id="popup-close" class="popup-close" aria-label="Back to map">&larr;</button>
-          <h2 id="popup-title" class="popup-title"></h2>
+          <h2 id="popup-title" class="visually-hidden"></h2>
 
-          <div class="popup-section">
-            <h3>A. Interactive Toy</h3>
-            <div class="popup-section-body">Coming in Layer 10</div>
+          <div class="popup-sidebar">
+            <button class="popup-tab" data-section="toy">Toy</button>
+            <button class="popup-tab" data-section="definition">Definition</button>
+            <button class="popup-tab" data-section="notation">Notation</button>
+            <button class="popup-tab" data-section="instrument">Instrument</button>
+            <button class="popup-tab" data-section="quiz">Quiz</button>
           </div>
 
-          <div class="popup-section">
-            <h3>B. Definition</h3>
-            <div class="popup-section-body">Coming in Layer 7</div>
-          </div>
-
-          <div class="popup-section">
-            <h3>C. Notation</h3>
-            <div class="popup-section-body">Coming in Layer 8</div>
-          </div>
-
-          <div class="popup-section">
-            <h3>D. Instrument</h3>
-            <div class="popup-section-body">Coming in Layer 9</div>
-          </div>
-
-          <div class="popup-section">
-            <h3>E. Quiz</h3>
-            <div class="popup-section-body">Coming in Layer 11</div>
+          <div class="popup-content">
+            <div class="popup-panel-body" data-section="toy">Coming in Layer 10</div>
+            <div class="popup-panel-body" data-section="definition" id="popup-definition">Coming in Layer 7</div>
+            <div class="popup-panel-body" data-section="notation">Coming in Layer 8</div>
+            <div class="popup-panel-body" data-section="instrument">Coming in Layer 9</div>
+            <div class="popup-panel-body" data-section="quiz">Coming in Layer 11</div>
           </div>
         </div>
       </div>
+
 
 
     </div>
