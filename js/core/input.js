@@ -15,3 +15,12 @@ window.addEventListener('keyup', (e) => {
 export function isKeyDown(key) {
   return keysPressed.has(key);
 }
+
+export function simulateKeyDown(key) {
+  keysPressed.add(key);
+}
+
+export function simulateKeyUp(key) {
+  keysPressed.delete(key);
+}
+

@@ -4,6 +4,7 @@ import { getCamera } from './map/camera.js';
 import { findNearestNodeInRange, PROXIMITY_RADIUS } from './map/nodes.js';
 import { openPopup, isPopupOpen } from './popup/popupController.js';
 import { initAudio, setVolume, updateProximityTone } from './core/audioEngine.js';
+import './core/touchControls.js';
 
 const canvas = document.getElementById('map-canvas');
 const ctx = canvas.getContext('2d');
