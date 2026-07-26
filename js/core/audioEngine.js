@@ -1,10 +1,8 @@
-// Relies on the global `Tone` object from the classic <script> tag in index.html.
+const BACKTRACK_VOLUME = -2;          
+const BACKTRACK_DUCKED_VOLUME = -16;  
+const EFFECT_VOLUME = -14;          
 
-const BACKTRACK_VOLUME = -2;         // normal level — backtrack is the prominent layer
-const BACKTRACK_DUCKED_VOLUME = -16; // while a popup is open (same 14dB duck as before)
-const EFFECT_VOLUME = -14;           // goat_baa / goat_step — still 12dB quieter than backtrack
-
-const BAA_INTERVAL_MS = 30000; // was 15000 — time between ambient goat_baa plays
+const BAA_INTERVAL_MS = 30000; 
 
 const backtrack = new Tone.Player({ url: 'assets/sounds/backtrack.mp3', loop: true }).toDestination();
 backtrack.volume.value = BACKTRACK_VOLUME;
@@ -16,7 +14,7 @@ const stepPlayer = new Tone.Player({ url: 'assets/sounds/goat_step.mp3', loop: t
 stepPlayer.volume.value = EFFECT_VOLUME;
 
 const proximityOsc = new Tone.Oscillator({ type: 'sine', frequency: 220 }).toDestination();
-proximityOsc.volume.value = -100; // effectively silent until started
+proximityOsc.volume.value = -100;  
 
 const keyboardSynth = new Tone.PolySynth(Tone.Synth).toDestination();
 keyboardSynth.volume.value = -6;
@@ -45,7 +43,7 @@ function safeStop(player) {
   try {
     player.stop();
   } catch (err) {
-    // already stopped — harmless
+
   }
 }
 
@@ -62,7 +60,6 @@ export async function initAudio() {
 }
 
 export function setVolume(linearVolume) {
-  // linearVolume: 0-1, from the HUD volume slider — governs everything below it
   Tone.getDestination().mute = linearVolume <= 0;
   if (linearVolume > 0) {
     Tone.getDestination().volume.value = Tone.gainToDb(linearVolume);
@@ -102,7 +99,6 @@ export function setWalking(isWalking) {
 }
 
 export function updateProximityTone(proximityRatio) {
-  // proximityRatio: 0 (out of range) to 1 (right on the node)
   if (!audioReady) return;
 
   if (proximityRatio <= 0) {

@@ -1,10 +1,11 @@
-import { drawBackground, drawNodes, isMapReady } from './map/mapScene.js';
-import { getSectionAtX } from './core/config.js';
-import { updateGoat, drawGoat, isGoatReady, goat } from './map/goat.js';
-import { getCamera } from './map/camera.js';
+import { drawBackground, isMapReady, SCENE_ENTITIES, getDebugPanelRects } from './map/mapScene.js';
+import { getSectionAt, getConceptPosition, PANEL_SIZE } from './core/config.js';
+import { updateGoat, drawGoat, isGoatReady, goat, getContainmentRects, NODE_BLOCK_HALF_SIZE } from './map/goat.js';
+import { getCamera, ZOOM } from './map/camera.js';
 import { findNearestNodeInRange, PROXIMITY_RADIUS } from './map/nodes.js';
 import { openPopup, isPopupOpen } from './popup/popupController.js';
 import { initAudio, setVolume, updateProximityTone } from './core/audioEngine.js';
+import { CONCEPTS } from './data/concepts.js';
 import './core/touchControls.js';
 
 const canvas = document.getElementById('map-canvas');
@@ -20,8 +21,10 @@ let gameStarted = false;
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
-  canvas.width = window.innerWidth * dpr;
-  canvas.height = window.innerHeight * dpr;
+  canvas.style.width = `${window.innerWidth}px`;
+  canvas.style.height = `${window.innerHeight}px`;
+  canvas.width = Math.round(window.innerWidth * dpr);
+  canvas.height = Math.round(window.innerHeight * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
@@ -34,9 +37,65 @@ const SECTION_DIALOGUE = {
   foundations: 'The goat wanders through the Foundations meadow...',
   melody: 'The goat steps into the golden fields of Melody...',
   harmony: 'The goat climbs into the misty hills of Harmony...',
+  playground: 'The goat bounds into the snowy Playground!',
 };
-let lastSection = null;
+const HUB_DIALOGUE = 'The goat returns to the village square...';
+let lastSection; 
 
+let debugEnabled = false;
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'KeyD') {
+    debugEnabled = !debugEnabled;
+  }
+});
+
+function drawDebugWorldOverlay(cameraX, cameraY) {
+  ctx.save();
+
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(80, 220, 255, 0.7)';
+  for (const panel of getDebugPanelRects()) {
+    const screenX = panel.centreX - PANEL_SIZE / 2 - cameraX;
+    const screenY = panel.centreY - PANEL_SIZE / 2 - cameraY;
+    ctx.strokeRect(screenX, screenY, PANEL_SIZE, PANEL_SIZE);
+  }
+
+  ctx.strokeStyle = 'rgba(255, 90, 255, 0.9)';
+  for (const rect of getContainmentRects()) {
+    ctx.strokeRect(
+      rect.left - cameraX, rect.top - cameraY,
+      rect.right - rect.left, rect.bottom - rect.top
+    );
+  }
+
+  for (const concept of CONCEPTS) {
+    const { x, y } = getConceptPosition(concept);
+    const screenX = x - cameraX;
+    const screenY = y - cameraY;
+
+    ctx.strokeStyle = 'rgba(255, 90, 90, 0.85)';
+    ctx.strokeRect(
+      screenX - NODE_BLOCK_HALF_SIZE, screenY - NODE_BLOCK_HALF_SIZE,
+      NODE_BLOCK_HALF_SIZE * 2, NODE_BLOCK_HALF_SIZE * 2
+    );
+
+    ctx.fillStyle = 'rgba(255, 230, 90, 0.95)';
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawDebugCoordsReadout(viewHeight) {
+  ctx.save();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '14px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(`x: ${Math.round(goat.x)}  y: ${Math.round(goat.y)}`, 12, viewHeight - 12);
+  ctx.restore();
+}
 
 function gameLoop(timestamp) {
   const deltaSeconds = lastTimestamp === null ? 0 : (timestamp - lastTimestamp) / 1000;
@@ -49,10 +108,10 @@ function gameLoop(timestamp) {
       hintText.classList.add('hidden');
     }
     currentNearbyNode = findNearestNodeInRange(goat.x, goat.y);
-    const currentSection = getSectionAtX(goat.x);
+    const currentSection = getSectionAt(goat.x, goat.y);
     if (currentSection !== lastSection) {
-      if (lastSection !== null) {
-        typeDialogue(SECTION_DIALOGUE[currentSection]);
+      if (lastSection !== undefined) {
+        typeDialogue(currentSection === null ? HUB_DIALOGUE : SECTION_DIALOGUE[currentSection]);
       }
       lastSection = currentSection;
     }
@@ -63,17 +122,21 @@ function gameLoop(timestamp) {
 
   const viewWidth = window.innerWidth;
   const viewHeight = window.innerHeight;
-  const { cameraX, cameraY } = getCamera(goat.x, goat.y, viewWidth, viewHeight);
+
+  const effectiveViewWidth = viewWidth / ZOOM;
+  const effectiveViewHeight = viewHeight / ZOOM;
+  const { cameraX, cameraY } = getCamera(goat.x, goat.y, effectiveViewWidth, effectiveViewHeight, deltaSeconds);
 
   if (currentNearbyNode) {
-    const screenX = currentNearbyNode.mapNode.x - cameraX;
-    const screenY = currentNearbyNode.mapNode.y - cameraY - NODE_PROMPT_OFFSET;
+    const { x: nodeX, y: nodeY } = getConceptPosition(currentNearbyNode);
+    const screenX = (nodeX - cameraX) * ZOOM;
+    const screenY = (nodeY - cameraY - NODE_PROMPT_OFFSET) * ZOOM;
     interactPrompt.style.left = `${screenX}px`;
     interactPrompt.style.top = `${screenY}px`;
     interactPrompt.classList.remove('hidden');
 
-    const dx = currentNearbyNode.mapNode.x - goat.x;
-    const dy = currentNearbyNode.mapNode.y - goat.y;
+    const dx = nodeX - goat.x;
+    const dy = nodeY - goat.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     updateProximityTone(1 - Math.min(distance / PROXIMITY_RADIUS, 1));
   } else {
@@ -82,13 +145,32 @@ function gameLoop(timestamp) {
   }
 
   if (isMapReady()) {
-    drawBackground(ctx, cameraX, cameraY, viewWidth, viewHeight);
+    ctx.save();
+    ctx.scale(ZOOM, ZOOM);
+
+    drawBackground(ctx, cameraX, cameraY, effectiveViewWidth, effectiveViewHeight);
+
+    const drawList = [...SCENE_ENTITIES];
+    if (isGoatReady()) {
+      drawList.push({
+        y: goat.y,
+        draw: (drawCtx, camX, camY) => drawGoat(drawCtx, camX, camY),
+      });
+    }
+    drawList.sort((a, b) => a.y - b.y);
+    for (const entity of drawList) {
+      entity.draw(ctx, cameraX, cameraY, effectiveViewWidth, effectiveViewHeight);
+    }
+
+    if (debugEnabled) {
+      drawDebugWorldOverlay(cameraX, cameraY);
+    }
+
+    ctx.restore();
   }
-  if (isGoatReady()) {
-    drawGoat(ctx, cameraX, cameraY);
-  }
-  if (isMapReady()) {
-    drawNodes(ctx, cameraX, cameraY, viewWidth, viewHeight);
+
+  if (debugEnabled) {
+    drawDebugCoordsReadout(viewHeight);
   }
 
   requestAnimationFrame(gameLoop);
@@ -101,7 +183,7 @@ async function handleStart() {
   setVolume(getEffectiveVolume());
   startGate.classList.add('hidden');
   gameStarted = true;
-  typeDialogue('The goat wakes up and looks out across the hills...');
+  typeDialogue('The goat wakes up and looks out across the village square...');
 }
 
 startGate.addEventListener('click', handleStart);
@@ -116,7 +198,7 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// --- HUD: volume + mute ---
+// HUD
 const muteButton = document.getElementById('mute-button');
 const muteIcon = document.getElementById('mute-icon');
 const volumeSlider = document.getElementById('volume-slider');
@@ -150,20 +232,23 @@ function updateVolumeUI() {
   setVolume(getEffectiveVolume());
 }
 
-// Layer 6's AudioEngine reads this to scale all playback volume.
 export function getEffectiveVolume() {
   return (isMuted ? 0 : volume) / 100;
 }
 
-// --- HUD: dialogue box, word-by-word reveal ---
 const dialogueBox = document.getElementById('dialogue-box');
+let dialogueTimeouts = [];
 
 function typeDialogue(text, wordDelayMs = 220) {
+  dialogueTimeouts.forEach((id) => clearTimeout(id));
+  dialogueTimeouts = [];
+
   const words = text.split(' ');
   dialogueBox.textContent = '';
   words.forEach((word, i) => {
-    setTimeout(() => {
+    const id = setTimeout(() => {
       dialogueBox.textContent += (i === 0 ? '' : ' ') + word;
     }, i * wordDelayMs);
+    dialogueTimeouts.push(id);
   });
 }
