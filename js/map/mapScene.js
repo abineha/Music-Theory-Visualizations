@@ -1,26 +1,161 @@
 import { CONCEPTS } from '../data/concepts.js';
 import { isVisited, isQuizPassed } from '../core/progress.js';
+import { PANEL_SIZE, getPanelList, getConceptPosition } from '../core/config.js';
 
-const backgroundImage = new Image();
-backgroundImage.src = 'assets/images/world-background.svg';
+const TEXTURE_PX = 1800;  
+const NODE_MARKER_SIZE = 140;  
 
-const nodeMarkerImage = new Image();
-nodeMarkerImage.src = 'assets/images/node-marker.svg';
+function loadImage(src) {
+  const img = new Image();
+  img.src = src;
+  return img;
+}
 
-const NODE_MARKER_SIZE = 140; // world units — ~1.5-2x goat height, per the art sizing plan
+const nodeMarkerImage = loadImage('assets/images/node-marker.svg');
+
+const PANEL_TEXTURES = {
+  hub:   { src: 'assets/images/world/Hub.png', filter: 'saturate(0.5) brightness(0.92)' },
+  grass: { src: 'assets/images/world/grass.png', filter: 'saturate(0.5) brightness(0.92)' },
+  mud:   { src: 'assets/images/world/mud.png', filter: 'saturate(0.5) brightness(0.92)' },
+  sand:  { src: 'assets/images/world/sand.png', filter: 'saturate(0.5) brightness(0.92)' },
+  snow:  { src: 'assets/images/world/tile.png', filter: 'saturate(0.5) brightness(0.92)' },
+};
+
+const TERRAIN_BY_SECTION = {
+  foundations: 'grass',
+  melody: 'mud',
+  harmony: 'sand',
+  playground: 'snow',
+};
+
+const rawTextureImages = {};
+for (const key of Object.keys(PANEL_TEXTURES)) {
+  rawTextureImages[key] = loadImage(PANEL_TEXTURES[key].src);
+}
+
+const tintedCanvases = {};
+
+function buildTintedCanvas(key) {
+  const img = rawTextureImages[key];
+  if (!img.complete || img.naturalWidth === 0) return null;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  const offCtx = canvas.getContext('2d');
+
+  const { filter } = PANEL_TEXTURES[key];
+  if (filter && filter !== 'none' && 'filter' in offCtx) {
+    offCtx.filter = filter;
+    offCtx.drawImage(img, 0, 0);
+    offCtx.filter = 'none';
+  } else {
+    offCtx.drawImage(img, 0, 0);
+  }
+  return canvas;
+}
+
+function ensureTintedCanvases() {
+  for (const key of Object.keys(PANEL_TEXTURES)) {
+    if (!tintedCanvases[key]) {
+      const canvas = buildTintedCanvas(key);
+      if (canvas) tintedCanvases[key] = canvas;
+    }
+  }
+}
 
 export function isMapReady() {
-  return backgroundImage.complete && nodeMarkerImage.complete;
+  ensureTintedCanvases();
+  return nodeMarkerImage.complete && Object.keys(PANEL_TEXTURES).every((key) => tintedCanvases[key]);
+}
+
+const SECTION_NODE_COUNTS = CONCEPTS.reduce((counts, concept) => {
+  counts[concept.section] = (counts[concept.section] || 0) + 1;
+  return counts;
+}, {});
+const TERRAIN_PANELS = getPanelList(SECTION_NODE_COUNTS);
+
+export function getDebugPanelRects() {
+  return [{ section: 'hub', centreX: 0, centreY: 0 }, ...TERRAIN_PANELS];
+}
+
+function drawPanel(ctx, canvas, centreX, centreY, cameraX, cameraY, viewWidth, viewHeight) {
+
+  const screenX = Math.round(centreX - PANEL_SIZE / 2 - cameraX);
+  const screenY = Math.round(centreY - PANEL_SIZE / 2 - cameraY);
+
+  if (screenX + PANEL_SIZE < 0 || screenX > viewWidth ||
+      screenY + PANEL_SIZE < 0 || screenY > viewHeight) {
+    return;  
+  }
+
+  ctx.drawImage(canvas, 0, 0, TEXTURE_PX, TEXTURE_PX, screenX, screenY, PANEL_SIZE, PANEL_SIZE);
 }
 
 export function drawBackground(ctx, cameraX, cameraY, viewWidth, viewHeight) {
-  ctx.drawImage(
-    backgroundImage,
-    cameraX, cameraY, viewWidth, viewHeight,
-    0, 0, viewWidth, viewHeight
+
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, viewWidth, viewHeight);
+
+  if (tintedCanvases.hub) {
+    drawPanel(ctx, tintedCanvases.hub, 0, 0, cameraX, cameraY, viewWidth, viewHeight);
+  }
+  for (const panel of TERRAIN_PANELS) {
+    const terrainKey = TERRAIN_BY_SECTION[panel.section];
+    const canvas = tintedCanvases[terrainKey];
+    if (!canvas) continue;
+    drawPanel(ctx, canvas, panel.centreX, panel.centreY, cameraX, cameraY, viewWidth, viewHeight);
+  }
+}
+
+const SIGN_IMAGES = {
+  melody: loadImage('assets/images/world/sign-melody.png'),
+  playground: loadImage('assets/images/world/sign-playground.png'),
+  foundations: loadImage('assets/images/world/sign-foundations.png'),
+  harmony: loadImage('assets/images/world/sign-harmony.png'),
+};
+const SIGN_POS = {
+  melody: { x: 0, y: -190 },
+  playground: { x: 0, y: 370 },
+  foundations: { x: -320, y: 40 },
+  harmony: { x: 320, y: 40 },
+};
+const SIGN_SIZE = { w: 208, h: 232 };
+
+function drawFeetAnchored(ctx, image, worldX, worldY, w, h, cameraX, cameraY, viewWidth, viewHeight, label) {
+  const screenX = worldX - cameraX;
+  const screenY = worldY - cameraY;
+
+  if (screenX + w < 0 || screenX - w > viewWidth || screenY < -h || screenY - h > viewHeight) {
+    return;  
+  }
+
+  if (image.complete && image.naturalWidth > 0) {
+    ctx.drawImage(image, screenX - w / 2, screenY - h, w, h);
+  } else {
+    ctx.save();
+    ctx.fillStyle = 'rgba(80, 60, 40, 0.55)';
+    ctx.strokeStyle = '#f4c95d';
+    ctx.lineWidth = 2;
+    ctx.fillRect(screenX - w / 2, screenY - h, w, h);
+    ctx.strokeRect(screenX - w / 2, screenY - h, w, h);
+    ctx.fillStyle = '#fdf6e3';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, screenX, screenY - h / 2);
+    ctx.restore();
+  }
+}
+
+function drawSign(ctx, cameraX, cameraY, viewWidth, viewHeight, section) {
+  const pos = SIGN_POS[section];
+  drawFeetAnchored(
+    ctx, SIGN_IMAGES[section], pos.x, pos.y, SIGN_SIZE.w, SIGN_SIZE.h,
+    cameraX, cameraY, viewWidth, viewHeight, `${section} sign`
   );
 }
 
+// --- Nodes ---
 function drawBadge(ctx, x, y, symbol, color) {
   ctx.beginPath();
   ctx.arc(x, y, 14, 0, Math.PI * 2);
@@ -34,39 +169,52 @@ function drawBadge(ctx, x, y, symbol, color) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(symbol, x, y);
-  ctx.textBaseline = 'alphabetic'; // reset — the title text drawn after this relies on the default baseline
+  ctx.textBaseline = 'alphabetic'; 
 }
 
-export function drawNodes(ctx, cameraX, cameraY, viewWidth, viewHeight) {
-  for (const concept of CONCEPTS) {
-    const { x, y } = concept.mapNode;
-    const screenX = x - cameraX;
-    const screenY = y - cameraY;
+function drawSingleNode(ctx, concept, cameraX, cameraY, viewWidth, viewHeight) {
+  const { x, y } = getConceptPosition(concept);
+  const screenX = x - cameraX;
+  const screenY = y - cameraY;
 
-    if (screenX < -NODE_MARKER_SIZE || screenX > viewWidth + NODE_MARKER_SIZE ||
-        screenY < -NODE_MARKER_SIZE || screenY > viewHeight + NODE_MARKER_SIZE) {
-      continue;
-    }
-
-    ctx.drawImage(
-      nodeMarkerImage,
-      screenX - NODE_MARKER_SIZE / 2,
-      screenY - NODE_MARKER_SIZE,
-      NODE_MARKER_SIZE,
-      NODE_MARKER_SIZE
-    );
-
-    ctx.fillStyle = '#2a1f18';
-    ctx.font = 'bold 18px sans-serif';
-    ctx.textAlign = 'center';
-
-    if (isQuizPassed(concept.id)) {
-      drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE + 15, '\u2605', '#f4c95d');
-    } else if (isVisited(concept.id)) {
-      drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE + 15, '\u2713', '#5a8a3f');
-    }
-
-    ctx.fillText(concept.title, screenX, screenY + 20);
+  if (screenX < -NODE_MARKER_SIZE || screenX > viewWidth + NODE_MARKER_SIZE ||
+      screenY < -NODE_MARKER_SIZE || screenY > viewHeight + NODE_MARKER_SIZE) {
+    return;
   }
+
+  ctx.drawImage(
+    nodeMarkerImage,
+    screenX - NODE_MARKER_SIZE / 2,
+    screenY - NODE_MARKER_SIZE,
+    NODE_MARKER_SIZE,
+    NODE_MARKER_SIZE
+  );
+
+  ctx.fillStyle = '#2a1f18';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.textAlign = 'center';
+
+  if (isQuizPassed(concept.id)) {
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE + 15, '★', '#f4c95d');
+  } else if (isVisited(concept.id)) {
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE + 15, '✓', '#5a8a3f');
+  }
+
+  ctx.fillText(concept.title, screenX, screenY + 20);
 }
 
+export const SCENE_ENTITIES = [
+  ...CONCEPTS.map((concept) => {
+    const { y } = getConceptPosition(concept);
+    return {
+      y,
+      draw: (ctx, cameraX, cameraY, viewWidth, viewHeight) =>
+        drawSingleNode(ctx, concept, cameraX, cameraY, viewWidth, viewHeight),
+    };
+  }),
+  ...Object.keys(SIGN_POS).map((section) => ({
+    y: SIGN_POS[section].y,
+    draw: (ctx, cameraX, cameraY, viewWidth, viewHeight) =>
+      drawSign(ctx, cameraX, cameraY, viewWidth, viewHeight, section),
+  })),
+];
