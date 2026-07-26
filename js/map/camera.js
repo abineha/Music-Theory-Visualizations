@@ -1,5 +1,5 @@
 
-export const ZOOM = 1.22; 
+export const ZOOM = 1.20; 
 const HOLD_RADIUS = 220;
 const FOLLOW_RADIUS = 380;
 const CAMERA_LAG = 4;

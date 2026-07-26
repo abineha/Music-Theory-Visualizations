@@ -121,6 +121,12 @@ const SIGN_POS = {
   harmony: { x: 320, y: 40 },
 };
 const SIGN_SIZE = { w: 208, h: 232 };
+const SIGN_SIZE_OVERRIDES = {
+  harmony: { w: 330, h: 360 },
+  foundations: { w: 330, h: 360 },
+  melody: { w: 330, h: 360 },
+  playground: { w: 330, h: 360 },
+};
 
 function drawFeetAnchored(ctx, image, worldX, worldY, w, h, cameraX, cameraY, viewWidth, viewHeight, label) {
   const screenX = worldX - cameraX;
@@ -147,15 +153,76 @@ function drawFeetAnchored(ctx, image, worldX, worldY, w, h, cameraX, cameraY, vi
   }
 }
 
-function drawSign(ctx, cameraX, cameraY, viewWidth, viewHeight, section) {
-  const pos = SIGN_POS[section];
-  drawFeetAnchored(
-    ctx, SIGN_IMAGES[section], pos.x, pos.y, SIGN_SIZE.w, SIGN_SIZE.h,
-    cameraX, cameraY, viewWidth, viewHeight, `${section} sign`
-  );
+const SIGN_LABELS = {
+  foundations: 'Foundations',
+  melody: 'Melody',
+  harmony: 'Harmony',
+  playground: 'Instrument Playground',
+};
+
+const SIGN_PROGRESS_OFFSET_Y = 60; 
+
+function getSectionProgress(section) {
+  let total = 0;
+  let completed = 0;
+  for (const concept of CONCEPTS) {
+    if (concept.section !== section) continue;
+    total++;
+    if (isVisited(concept.id)) completed++;
+  }
+  return { completed, total };
 }
 
-// --- Nodes ---
+const SIGN_PROGRESS_OFFSET_OVERRIDES = {
+  playground: 0, 
+};
+
+const LEVITATE_AMPLITUDE = 6; 
+const LEVITATE_SPEED = 2;    
+const SIGN_PHASE_OFFSETS = {
+  foundations: 0,
+  melody: Math.PI / 2,
+  harmony: Math.PI,
+  playground: Math.PI * 1.5,
+}; 
+
+function drawSign(ctx, cameraX, cameraY, viewWidth, viewHeight, section) {
+  const pos = SIGN_POS[section];
+  const size = SIGN_SIZE_OVERRIDES[section] || SIGN_SIZE;
+  drawFeetAnchored(
+    ctx, SIGN_IMAGES[section], pos.x, pos.y, size.w, size.h,
+    cameraX, cameraY, viewWidth, viewHeight, `${section} sign`
+  );
+
+  const { completed, total } = getSectionProgress(section);
+  const screenX = pos.x - cameraX;
+  const topScreenY = pos.y - cameraY - size.h;
+  const baseOffsetY = SIGN_PROGRESS_OFFSET_OVERRIDES[section] ?? SIGN_PROGRESS_OFFSET_Y;
+
+  const t = performance.now() / 1000;
+  const phase = t * LEVITATE_SPEED + (SIGN_PHASE_OFFSETS[section] || 0);
+  const levitateOffset = Math.sin(phase) * LEVITATE_AMPLITUDE;
+  const glow = 6 + Math.sin(phase) * 3; 
+
+  const label = `${completed}/${total}`;
+  const labelY = topScreenY + baseOffsetY + levitateOffset;
+
+  ctx.save();
+  ctx.font = 'bold 22px sans-serif';
+  ctx.textAlign = 'center';
+
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#2a1f18';
+  ctx.strokeText(label, screenX, labelY);
+
+  ctx.shadowColor = 'rgba(244, 201, 93, 0.9)';
+  ctx.shadowBlur = glow;
+  ctx.fillStyle = '#fdf6e3';
+  ctx.fillText(label, screenX, labelY);
+  ctx.restore();
+}
+
+// Nodes 
 function drawBadge(ctx, x, y, symbol, color) {
   ctx.beginPath();
   ctx.arc(x, y, 14, 0, Math.PI * 2);
