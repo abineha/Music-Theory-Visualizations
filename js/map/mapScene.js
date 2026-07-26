@@ -14,7 +14,7 @@ function loadImage(src) {
 const nodeMarkerImage = loadImage('assets/images/node-marker.svg');
 
 const PANEL_TEXTURES = {
-  hub:   { src: 'assets/images/world/Hub.png', filter: 'saturate(0.5) brightness(0.92)' },
+  hub:   { src: 'assets/images/world/hub.png', filter: 'saturate(0.5) brightness(0.92)' },
   grass: { src: 'assets/images/world/grass.png', filter: 'saturate(0.5) brightness(0.92)' },
   mud:   { src: 'assets/images/world/mud.png', filter: 'saturate(0.5) brightness(0.92)' },
   sand:  { src: 'assets/images/world/sand.png', filter: 'saturate(0.5) brightness(0.92)' },
