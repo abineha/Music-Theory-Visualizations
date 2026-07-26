@@ -30,7 +30,7 @@ const SHADOW_OFFSET_X = -8;
 
 export const goat = {
   x: 0,
-  y: 150, 
+  y: -50, 
   facing: 'right',
   moving: false,
   frameIndex: 0,
