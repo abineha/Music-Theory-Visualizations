@@ -120,13 +120,7 @@ const SIGN_POS = {
   foundations: { x: -320, y: 40 },
   harmony: { x: 320, y: 40 },
 };
-const SIGN_SIZE = { w: 208, h: 232 };
-const SIGN_SIZE_OVERRIDES = {
-  harmony: { w: 330, h: 360 },
-  foundations: { w: 330, h: 360 },
-  melody: { w: 330, h: 360 },
-  playground: { w: 330, h: 360 },
-};
+const SIGN_SIZE = { w: 330, h: 360 };
 
 function drawFeetAnchored(ctx, image, worldX, worldY, w, h, cameraX, cameraY, viewWidth, viewHeight, label) {
   const screenX = worldX - cameraX;
@@ -153,14 +147,7 @@ function drawFeetAnchored(ctx, image, worldX, worldY, w, h, cameraX, cameraY, vi
   }
 }
 
-const SIGN_LABELS = {
-  foundations: 'Foundations',
-  melody: 'Melody',
-  harmony: 'Harmony',
-  playground: 'Instrument Playground',
-};
-
-const SIGN_PROGRESS_OFFSET_Y = 60; 
+const SIGN_PROGRESS_OFFSET_Y = 60;
 
 function getSectionProgress(section) {
   let total = 0;
@@ -188,7 +175,7 @@ const SIGN_PHASE_OFFSETS = {
 
 function drawSign(ctx, cameraX, cameraY, viewWidth, viewHeight, section) {
   const pos = SIGN_POS[section];
-  const size = SIGN_SIZE_OVERRIDES[section] || SIGN_SIZE;
+  const size = SIGN_SIZE;
   drawFeetAnchored(
     ctx, SIGN_IMAGES[section], pos.x, pos.y, size.w, size.h,
     cameraX, cameraY, viewWidth, viewHeight, `${section} sign`
