@@ -1,8 +1,5 @@
 
-export const REFERENCE_VIEWPORT_WIDTH = 1600;
-export const REFERENCE_VIEWPORT_HEIGHT = 900;
-
-export const PANEL_SIZE = 900;      
+export const PANEL_SIZE = 900;
 export const NODES_PER_PANEL = 2;  
 
 export const SECTION_DIRECTION = {
