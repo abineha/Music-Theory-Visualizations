@@ -28,9 +28,17 @@ const SHADOW_RADIUS_Y = 10;
 const SHADOW_OPACITY = 0.28;
 const SHADOW_OFFSET_X = -8;    
 
+const CLICK_TARGET_ARRIVE_DISTANCE = 8;
+const CLICK_TARGET_TIMEOUT = 4;
+const TARGET_MARKER_COLOR = '176, 224, 158';
+const TARGET_PULSE_SPEED = 3;
+
+const SPAWN_X = 0;
+const SPAWN_Y = -50;
+
 export const goat = {
-  x: 0,
-  y: -50, 
+  x: SPAWN_X,
+  y: SPAWN_Y,
   facing: 'right',
   moving: false,
   frameIndex: 0,
@@ -38,7 +46,10 @@ export const goat = {
   idleFrameIndex: 0,
   idleTimer: 0,
   bobPhase: 0,
+  target: null,     // ( x, y ) click-to-move dest
+  targetElapsed: 0,
 };
+
 
 
 function buildContainmentRects() {
@@ -69,6 +80,25 @@ function buildContainmentRects() {
 
 const CONTAINMENT_RECTS = buildContainmentRects();
 
+export function setGoatTarget(x, y) {
+  goat.target = { x, y };
+  goat.targetElapsed = 0;
+}
+
+export function resetGoatPosition() {
+  goat.x = SPAWN_X;
+  goat.y = SPAWN_Y;
+  goat.target = null;
+  goat.targetElapsed = 0;
+  goat.facing = 'right';
+  goat.moving = false;
+  goat.frameIndex = 0;
+  goat.frameTimer = 0;
+  goat.idleFrameIndex = 0;
+  goat.idleTimer = 0;
+  goat.bobPhase = 0;
+}
+
 export function getContainmentRects() {
   return CONTAINMENT_RECTS;
 }
@@ -92,10 +122,29 @@ export function updateGoat(deltaSeconds) {
   let dx = 0;
   let dy = 0;
 
-  if (isKeyDown('ArrowLeft'))  dx -= 1;
-  if (isKeyDown('ArrowRight')) dx += 1;
-  if (isKeyDown('ArrowUp'))    dy -= 1;
-  if (isKeyDown('ArrowDown'))  dy += 1;
+  const arrowActive =
+    isKeyDown('ArrowLeft') || isKeyDown('ArrowRight') ||
+    isKeyDown('ArrowUp') || isKeyDown('ArrowDown');
+
+  if (arrowActive) {
+    goat.target = null; 
+    if (isKeyDown('ArrowLeft'))  dx -= 1;
+    if (isKeyDown('ArrowRight')) dx += 1;
+    if (isKeyDown('ArrowUp'))    dy -= 1;
+    if (isKeyDown('ArrowDown'))  dy += 1;
+  } else if (goat.target) {
+    const tdx = goat.target.x - goat.x;
+    const tdy = goat.target.y - goat.y;
+    const dist = Math.sqrt(tdx * tdx + tdy * tdy);
+
+    goat.targetElapsed += deltaSeconds;
+    if (dist < CLICK_TARGET_ARRIVE_DISTANCE || goat.targetElapsed > CLICK_TARGET_TIMEOUT) {
+      goat.target = null;
+    } else {
+      dx = tdx;
+      dy = tdy;
+    }
+  }
 
   const moving = dx !== 0 || dy !== 0;
   goat.moving = moving;
@@ -175,4 +224,26 @@ export function drawGoat(ctx, cameraX, cameraY) {
 
 export function isGoatReady() {
   return FRAMES_RIGHT.every((img) => img.complete) && IMAGE_BLINK.complete;
+}
+
+export function drawMoveTarget(ctx, cameraX, cameraY) {
+  if (!goat.target) return;
+
+  const screenX = goat.target.x - cameraX;
+  const screenY = goat.target.y - cameraY;
+  const t = (performance.now() / 1000) * TARGET_PULSE_SPEED;
+  const pulse = (Math.sin(t) + 1) / 2; 
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(screenX, screenY, 10 + pulse * 8, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(${TARGET_MARKER_COLOR}, ${0.9 - pulse * 0.6})`;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(${TARGET_MARKER_COLOR}, 0.9)`;
+  ctx.fill();
+  ctx.restore();
 }

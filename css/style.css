@@ -68,6 +68,44 @@ html, body {
   pointer-events: none;
 }
 
+.zoom-control {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(109, 78, 57, 0.75);
+  border: 2px solid #d9b966;
+  border-radius: 20px;
+}
+
+.zoom-icon {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 18px;
+  opacity: 0.9;
+}
+
+.zoom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: #ead8ca;
+  accent-color: #f4c95d;
+  outline: none;
+  cursor: pointer;
+  margin-top: 20px;
+  transform: rotate(-90deg);
+}
+
 .volume-control {
   position: absolute;
   bottom: 20px;
@@ -76,8 +114,8 @@ html, body {
   align-items: center;
   gap: 10px;
   padding: 6px 14px 6px 6px;
-  background: rgba(26, 20, 16, 0.75);
-  border: 2px solid #f4c95d;
+  background: rgba(109, 78, 57, 0.75);
+  border: 2px solid #d9b966;
   border-radius: 30px;
 }
 
@@ -86,18 +124,46 @@ html, body {
   height: 36px;
   border-radius: 50%;
   border: none;
-  background: transparent;
+  background: #82c683; 
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.hud-button:hover {
+  transform: scale(1.06);
+}
+
+.home-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 64px;
+  height: 64px;
+  background: rgba(109, 78, 57, 0.85);
+  border: 3px solid #d9b966;
+}
+
+.home-button:hover {
+  background: rgba(74, 53, 38, 0.9);
+}
+
+.home-button img {
+  width: 36px;
+  height: 36px;
+}
+
+.hud-button.muted {
+  background: #c28383; 
 }
 
 .hud-button img {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 }
 
 .volume-slider {
@@ -106,29 +172,57 @@ html, body {
   width: 90px;
   height: 4px;
   border-radius: 2px;
-  background: #6b4a2f;
+  background: #ead8ca;
+  accent-color: #f4c95d;
   outline: none;
   cursor: pointer;
 }
 
-.volume-slider::-webkit-slider-thumb {
+.volume-slider::-webkit-slider-thumb,
+.zoom-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
   background: #f4c95d;
-  border: 2px solid #3a2a1a;
+  border: 2px solid #795d40;
   cursor: pointer;
 }
 
-.volume-slider::-moz-range-thumb {
+.volume-slider::-moz-range-thumb,
+.zoom-slider::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
   background: #f4c95d;
-  border: 2px solid #3a2a1a;
+  border: 2px solid #81603f;
   cursor: pointer;
+}
+
+.move-hint {
+  position: absolute;
+  transform: translate(-50%, -140%);
+  padding: 6px 12px;
+  background: rgba(74, 143, 60, 0.9);
+  color: #fdf6e3;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  animation: moveHintPulse 1.4s ease-in-out infinite;
+  z-index: 4;
+}
+
+.move-hint.hidden {
+  opacity: 0;
+}
+
+@keyframes moveHintPulse {
+  0%, 100% { transform: translate(-50%, -140%) scale(1); }
+  50% { transform: translate(-50%, -140%) scale(1.08); }
 }
 
 .interact-prompt {
