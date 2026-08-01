@@ -1,5 +1,4 @@
-
-export const ZOOM = 1.20; 
+export let ZOOM = 1.2; 
 const HOLD_RADIUS = 220;
 const FOLLOW_RADIUS = 380;
 const CAMERA_LAG = 4;
@@ -38,4 +37,8 @@ export function getCamera(targetX, targetY, viewWidth, viewHeight, deltaSeconds 
   }
 
   return { cameraX: currentCameraX, cameraY: currentCameraY };
+}
+
+export function setZoom(value) {
+  ZOOM = value;
 }

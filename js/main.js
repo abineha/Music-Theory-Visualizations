@@ -1,16 +1,18 @@
 import { drawBackground, isMapReady, SCENE_ENTITIES, getDebugPanelRects } from './map/mapScene.js';
 import { getSectionAt, getConceptPosition, PANEL_SIZE } from './core/config.js';
-import { updateGoat, drawGoat, isGoatReady, goat, getContainmentRects, NODE_BLOCK_HALF_SIZE } from './map/goat.js';
-import { getCamera, ZOOM } from './map/camera.js';
+import { updateGoat, drawGoat, isGoatReady, goat, getContainmentRects, NODE_BLOCK_HALF_SIZE, setGoatTarget, drawMoveTarget, resetGoatPosition } from './map/goat.js';
+import { getCamera, ZOOM, setZoom } from './map/camera.js';
 import { findNearestNodeInRange, PROXIMITY_RADIUS } from './map/nodes.js';
 import { openPopup, isPopupOpen } from './popup/popupController.js';
 import { initAudio, setVolume, updateProximityTone } from './core/audioEngine.js';
 import { CONCEPTS } from './data/concepts.js';
 import './core/touchControls.js';
 
+let lastCameraX = 0;
+let lastCameraY = 0;
+
 const canvas = document.getElementById('map-canvas');
 const ctx = canvas.getContext('2d');
-const hintText = document.getElementById('hint-text');
 
 const interactPrompt = document.getElementById('interact-prompt');
 const NODE_PROMPT_OFFSET = 160;
@@ -18,6 +20,9 @@ let currentNearbyNode = null;
 
 const startGate = document.getElementById('start-gate');
 let gameStarted = false;
+
+const moveHint = document.getElementById('move-hint');
+let hasClickedToMove = false;
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
@@ -32,7 +37,6 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 let lastTimestamp = null;
-let hasMoved = false;
 const SECTION_DIALOGUE = {
   foundations: 'The goat wanders through the Foundations meadow...',
   melody: 'The goat steps into the golden fields of Melody...',
@@ -102,11 +106,7 @@ function gameLoop(timestamp) {
   lastTimestamp = timestamp;
 
   if (gameStarted && !isPopupOpen()) {
-    const moved = updateGoat(deltaSeconds);
-    if (moved && !hasMoved) {
-      hasMoved = true;
-      hintText.classList.add('hidden');
-    }
+    updateGoat(deltaSeconds);
     currentNearbyNode = findNearestNodeInRange(goat.x, goat.y);
     const currentSection = getSectionAt(goat.x, goat.y);
     if (currentSection !== lastSection) {
@@ -126,6 +126,9 @@ function gameLoop(timestamp) {
   const effectiveViewWidth = viewWidth / ZOOM;
   const effectiveViewHeight = viewHeight / ZOOM;
   const { cameraX, cameraY } = getCamera(goat.x, goat.y, effectiveViewWidth, effectiveViewHeight, deltaSeconds);
+
+  lastCameraX = cameraX;
+  lastCameraY = cameraY;
 
   if (currentNearbyNode) {
     const { x: nodeX, y: nodeY } = getConceptPosition(currentNearbyNode);
@@ -161,6 +164,8 @@ function gameLoop(timestamp) {
     for (const entity of drawList) {
       entity.draw(ctx, cameraX, cameraY, effectiveViewWidth, effectiveViewHeight);
     }
+
+    drawMoveTarget(ctx, cameraX, cameraY);
 
     if (debugEnabled) {
       drawDebugWorldOverlay(cameraX, cameraY);
@@ -198,6 +203,46 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
+canvas.addEventListener('mousemove', (e) => {
+  if (!gameStarted || isPopupOpen() || hasClickedToMove) {
+    moveHint.classList.add('hidden');
+    return;
+  }
+  const rect = canvas.getBoundingClientRect();
+  moveHint.style.left = `${e.clientX - rect.left}px`;
+  moveHint.style.top = `${e.clientY - rect.top}px`;
+  moveHint.classList.remove('hidden');
+});
+
+canvas.addEventListener('mouseleave', () => {
+  moveHint.classList.add('hidden');
+});
+
+canvas.addEventListener('click', (e) => {
+  if (!gameStarted || isPopupOpen()) return;
+  const rect = canvas.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const clickY = e.clientY - rect.top;
+  const worldX = clickX / ZOOM + lastCameraX;
+  const worldY = clickY / ZOOM + lastCameraY;
+  setGoatTarget(worldX, worldY);
+});
+
+const zoomSlider = document.getElementById('zoom-slider');
+zoomSlider.value = ZOOM;
+updateSliderFill(zoomSlider);
+
+zoomSlider.addEventListener('input', () => {
+  const value = Number(zoomSlider.value);
+  setZoom(value);
+  updateSliderFill(zoomSlider);
+});
+
+const homeButton = document.getElementById('home-button');
+homeButton.addEventListener('click', () => {
+  resetGoatPosition();
+});
+
 // HUD
 const muteButton = document.getElementById('mute-button');
 const muteIcon = document.getElementById('mute-icon');
@@ -225,11 +270,23 @@ volumeSlider.addEventListener('input', () => {
 
 function updateVolumeUI() {
   const effectivelyMuted = isMuted || volume === 0;
+  volumeSlider.value = effectivelyMuted ? 0 : volume;
+  updateSliderFill(volumeSlider);
+  muteButton.classList.toggle('muted', effectivelyMuted);
   muteIcon.src = effectivelyMuted
     ? 'assets/images/icons/mute.svg'
     : 'assets/images/icons/unmute.svg';
   muteButton.setAttribute('aria-label', effectivelyMuted ? 'Unmute' : 'Mute');
   setVolume(getEffectiveVolume());
+}
+
+function updateSliderFill(slider) {
+  const min = Number(slider.min) || 0;
+  const max = Number(slider.max) || 100;
+  const percent = ((Number(slider.value) - min) / (max - min)) * 100;
+  const fillColor = '#f4c95d';
+  const trackColor = '#ead8ca';
+  slider.style.background = `linear-gradient(to right, ${fillColor} 0%, ${fillColor} ${percent}%, ${trackColor} ${percent}%, ${trackColor} 100%)`;
 }
 
 export function getEffectiveVolume() {
