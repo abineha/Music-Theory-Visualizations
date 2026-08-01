@@ -38,13 +38,23 @@ resizeCanvas();
 
 let lastTimestamp = null;
 const SECTION_DIALOGUE = {
-  foundations: 'The goat wanders through the Foundations meadow...',
-  melody: 'The goat steps into the golden fields of Melody...',
-  harmony: 'The goat climbs into the misty hills of Harmony...',
-  playground: 'The goat bounds into the snowy Playground!',
+  foundations: 'Sully trots through the soft green grass of Foundations Meadow, ready for a new adventure!',
+  melody: 'Sully climbs upward through the muddy paths of Melody Marsh, determined to keep going!',
+  harmony: 'Sully chases the gentle wind across the golden sands of Harmony Dunes, discovering new paths ahead!',
+  playground: 'Sully races into the snowy Playground, ready to jump, play, and have fun!',
 };
-const HUB_DIALOGUE = 'The goat returns to the village square...';
-let lastSection; 
+const HUB_DIALOGUE = "Sully returns to the village square, wondering where to explore next!";
+let lastSection;
+
+const IDLE_DIALOGUE = [
+  "Sully is getting a little curious... where are we going?",
+  "Sully is ready for a new adventure. Guide him onward!",
+  "Sully blinks and looks around, ready to explore!",
+  "Sully wonders what awaits beyond the path ahead...",
+];
+const IDLE_PROMPT_DELAY = 10;
+let idleTimer = 0;
+let idlePromptActive = false;
 
 let debugEnabled = false;
 window.addEventListener('keydown', (e) => {
@@ -114,6 +124,24 @@ function gameLoop(timestamp) {
         typeDialogue(currentSection === null ? HUB_DIALOGUE : SECTION_DIALOGUE[currentSection]);
       }
       lastSection = currentSection;
+      idleTimer = 0;
+      idlePromptActive = false;
+    }
+
+    if (goat.moving) {
+      if (idlePromptActive) {
+        typeDialogue(currentSection === null ? HUB_DIALOGUE : SECTION_DIALOGUE[currentSection]);
+        idlePromptActive = false;
+      }
+      idleTimer = 0;
+    } else {
+      idleTimer += deltaSeconds;
+      if (idleTimer >= IDLE_PROMPT_DELAY) {
+        const line = IDLE_DIALOGUE[Math.floor(Math.random() * IDLE_DIALOGUE.length)];
+        typeDialogue(line);
+        idlePromptActive = true;
+        idleTimer = 0;
+      }
     }
 
   } else {
@@ -188,7 +216,7 @@ async function handleStart() {
   setVolume(getEffectiveVolume());
   startGate.classList.add('hidden');
   gameStarted = true;
-  typeDialogue('The goat wakes up and looks out across the village square...');
+  typeDialogue("Sully the goat stretches, smiles, and looks across the village square. There's so much to explore today!");
 }
 
 startGate.addEventListener('click', handleStart);
