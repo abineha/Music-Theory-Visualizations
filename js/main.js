@@ -1,15 +1,12 @@
 import { drawBackground, isMapReady, SCENE_ENTITIES, getDebugPanelRects } from './map/mapScene.js';
 import { getSectionAt, getConceptPosition, PANEL_SIZE } from './core/config.js';
 import { updateGoat, drawGoat, isGoatReady, goat, getContainmentRects, NODE_BLOCK_HALF_SIZE, setGoatTarget, drawMoveTarget, resetGoatPosition } from './map/goat.js';
-import { getCamera, ZOOM, setZoom } from './map/camera.js';
-import { findNearestNodeInRange, PROXIMITY_RADIUS } from './map/nodes.js';
+import { getCamera, ZOOM, setZoom, screenToWorld } from './map/camera.js';
+import { findNearestNodeInRange, PROXIMITY_RADIUS, findNodeAtWorldPoint } from './map/nodes.js';
 import { openPopup, isPopupOpen } from './popup/popupController.js';
 import { initAudio, setVolume, updateProximityTone } from './core/audioEngine.js';
 import { CONCEPTS } from './data/concepts.js';
 import './core/touchControls.js';
-
-let lastCameraX = 0;
-let lastCameraY = 0;
 
 const canvas = document.getElementById('map-canvas');
 const ctx = canvas.getContext('2d');
@@ -155,9 +152,6 @@ function gameLoop(timestamp) {
   const effectiveViewHeight = viewHeight / ZOOM;
   const { cameraX, cameraY } = getCamera(goat.x, goat.y, effectiveViewWidth, effectiveViewHeight, deltaSeconds);
 
-  lastCameraX = cameraX;
-  lastCameraY = cameraY;
-
   if (currentNearbyNode) {
     const { x: nodeX, y: nodeY } = getConceptPosition(currentNearbyNode);
     const screenX = (nodeX - cameraX) * ZOOM;
@@ -169,13 +163,17 @@ function gameLoop(timestamp) {
     const dx = nodeX - goat.x;
     const dy = nodeY - goat.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    updateProximityTone(1 - Math.min(distance / PROXIMITY_RADIUS, 1));
+    if (currentNearbyNode.id === 'beat-tempo') {
+      updateProximityTone(0); // node 1 has its own drum/cymbal proximity audio instead
+    } else {
+      updateProximityTone(1 - Math.min(distance / PROXIMITY_RADIUS, 1));
+    }
   } else {
     interactPrompt.classList.add('hidden');
     updateProximityTone(0);
   }
 
-  if (isMapReady()) {
+  if (isMapReady() && !isPopupOpen()) {
     ctx.save();
     ctx.scale(ZOOM, ZOOM);
 
@@ -232,17 +230,31 @@ window.addEventListener('keydown', (e) => {
 });
 
 canvas.addEventListener('mousemove', (e) => {
-  if (!gameStarted || isPopupOpen() || hasClickedToMove) {
+  if (!gameStarted || isPopupOpen()) {
+    canvas.style.cursor = '';
     moveHint.classList.add('hidden');
     return;
   }
+
   const rect = canvas.getBoundingClientRect();
-  moveHint.style.left = `${e.clientX - rect.left}px`;
-  moveHint.style.top = `${e.clientY - rect.top}px`;
+  const screenX = e.clientX - rect.left;
+  const screenY = e.clientY - rect.top;
+
+  const world = screenToWorld(screenX, screenY);
+  const hoveredNode = findNodeAtWorldPoint(world.x, world.y);
+  canvas.style.cursor = hoveredNode ? 'pointer' : '';
+
+  if (hasClickedToMove) {
+    moveHint.classList.add('hidden');
+    return;
+  }
+  moveHint.style.left = `${screenX}px`;
+  moveHint.style.top = `${screenY}px`;
   moveHint.classList.remove('hidden');
 });
 
 canvas.addEventListener('mouseleave', () => {
+  canvas.style.cursor = '';
   moveHint.classList.add('hidden');
 });
 
@@ -251,9 +263,17 @@ canvas.addEventListener('click', (e) => {
   const rect = canvas.getBoundingClientRect();
   const clickX = e.clientX - rect.left;
   const clickY = e.clientY - rect.top;
-  const worldX = clickX / ZOOM + lastCameraX;
-  const worldY = clickY / ZOOM + lastCameraY;
-  setGoatTarget(worldX, worldY);
+  const world = screenToWorld(clickX, clickY);
+
+  const hitNode = findNodeAtWorldPoint(world.x, world.y);
+  if (hitNode) {
+    openPopup(hitNode);
+    return;
+  }
+
+  setGoatTarget(world.x, world.y);
+  hasClickedToMove = true;
+  moveHint.classList.add('hidden');
 });
 
 const zoomSlider = document.getElementById('zoom-slider');

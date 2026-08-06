@@ -42,3 +42,9 @@ export function getCamera(targetX, targetY, viewWidth, viewHeight, deltaSeconds 
 export function setZoom(value) {
   ZOOM = value;
 }
+
+export function screenToWorld(sx, sy) {
+  const cameraX = currentCameraX === null ? 0 : currentCameraX;
+  const cameraY = currentCameraY === null ? 0 : currentCameraY;
+  return { x: sx / ZOOM + cameraX, y: sy / ZOOM + cameraY };
+}

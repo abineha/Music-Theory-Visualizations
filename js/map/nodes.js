@@ -3,6 +3,24 @@ import { getConceptPosition } from '../core/config.js';
 
 export const PROXIMITY_RADIUS = 260; 
 
+export const CLICK_RADIUS = 90; // generous pointer accuracy
+
+export function findNodeAtWorldPoint(wx, wy) {
+  let best = null;
+  let bestDist = CLICK_RADIUS;
+
+  for (const concept of CONCEPTS) {
+    const { x, y } = getConceptPosition(concept);
+    const d = Math.hypot(x - wx, (y - 70) - wy);
+    if (d < bestDist) {
+      best = concept;
+      bestDist = d;
+    }
+  }
+
+  return best;
+}
+
 export function findNearestNodeInRange(goatX, goatY) {
   let nearest = null;
   let nearestDistance = Infinity;

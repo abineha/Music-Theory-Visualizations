@@ -26,7 +26,7 @@
 
       <div class="zoom-control">
         <img src="assets/images/icons/zoom.svg" alt="" class="zoom-icon">
-        <input type="range" id="zoom-slider" class="zoom-slider" min="0.8" max="1.8" step="0.05" value="1.2" aria-label="Zoom">
+        <input type="range" id="zoom-slider" class="zoom-slider" min="0.5" max="1.8" step="0.05" value="1.2" aria-label="Zoom">
       </div>
 
       <button id="home-button" class="hud-button home-button" aria-label="Return to start">
@@ -47,7 +47,12 @@
       <div id="popup-overlay" class="popup-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popup-title">
         <div class="popup-panel">
           <button id="popup-close" class="popup-close" aria-label="Back to map">&larr;</button>
+          <button id="popup-complete" class="popup-complete" aria-pressed="false">
+          <span class="popup-complete__box"></span>
+          <span class="popup-complete__label">Mark as done</span>
+          </button>
           <h2 id="popup-title" class="visually-hidden"></h2>
+
 
           <div class="popup-sidebar">
             <button class="popup-tab" data-section="toy">Toy</button>
@@ -74,8 +79,9 @@
 
   <div id="start-gate" class="start-gate">
     <div class="start-gate-panel">
-        <h1>Goat Music Theory</h1>
-        <p>Tap or press any key to begin</p>
+    <h1>Sully's Musical Adventure</h1>
+    <p>Explore, play, and learn music with Sully the goat!</p>
+    <p>Tap or click to begin!</p>
     </div>
   </div>
 
