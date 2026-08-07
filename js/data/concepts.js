@@ -16,7 +16,7 @@ export const CONCEPTS = [
     quiz: { type: 'ear-training', config: { question: 'Listen, is this pitch high or low?', playNotes: ['C6'], options: ['High', 'Low'], correctIndex: 0 } } },
   { id: 'loud-soft',         section: 'foundations', order: 4,  title: 'Loud and Soft',
     definition: 'Dynamics describe how loud or soft music is, from a gentle whisper (piano) to a big shout (forte).',
-    toy: { type: 'slider-toy', config: { mode: 'volume', note: 'C4', label: 'Drag to hear soft and loud' } },
+    toy: { type: 'voice-toy', config: {} },
     quiz: { type: 'ear-training', config: { question: 'Listen to this note, was it loud or soft?', playNotes: ['C4'], playVelocity: 0.15, options: ['Soft', 'Loud'], correctIndex: 0 } } },
 
   { id: 'twelve-notes',      section: 'melody',      order: 1,  title: 'The 12 Note Names',

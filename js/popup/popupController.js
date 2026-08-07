@@ -14,6 +14,7 @@ import { renderQuiz } from './quiz.js';
 import { renderBeatArcToy, stopBeatArcToy } from './toys/beatArcToy.js';
 import { renderRhythmStackToy, stopRhythmStackToy } from './toys/rhythmStackToy.js';
 import { renderMountainToy, stopMountainToy } from './toys/mountainToy.js';
+import { renderVoiceToy, stopVoiceToy } from './toys/voiceToy.js';
 
 
 const overlay = document.getElementById('popup-overlay');
@@ -91,6 +92,8 @@ function renderToy(concept) {
     renderRhythmStackToy(toyContainer, config);
   } else if (type === 'mountain-toy') {
     renderMountainToy(toyContainer, config);
+  } else if (type === 'voice-toy') {
+    renderVoiceToy(toyContainer, config);
   } else {
     toyContainer.innerHTML = 'No toy for this concept yet.';
   }
@@ -141,6 +144,7 @@ export function closePopup() {
   stopBeatArcToy();
   stopRhythmStackToy();
   stopMountainToy();
+  stopVoiceToy();
 }
 
 closeButton.addEventListener('click', closePopup);

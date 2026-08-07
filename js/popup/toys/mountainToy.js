@@ -64,7 +64,7 @@ export function renderMountainToy(container, config = {}) {
   climbPanel.appendChild(mountainBox);
 
   const mtnSvg = document.createElementNS(SVG_NS, 'svg');
-  mtnSvg.setAttribute('viewBox', '0 0 1000 600');
+  mtnSvg.setAttribute('viewBox', '0 0 1000 760');
   mtnSvg.setAttribute('class', 'mountain-toy__mountain-svg');
   mtnSvg.setAttribute('role', 'img');
   mtnSvg.setAttribute('aria-label', 'A mountain made of musical notes');
@@ -80,18 +80,18 @@ export function renderMountainToy(container, config = {}) {
         <polygon points="60,500 133.3,431.7 206.7,363.3 243.3,329.2 316.7,260.8 390,192.5 463.3,124.2 500,90 536.7,124.2 610,192.5 683.3,260.8 756.7,329.2 793.3,363.3 866.7,431.7 940,500 940,600 60,600"/>
       </clipPath>
     </defs>
-    <rect width="1000" height="600" fill="url(#mtnSky)"/>
+    <rect width="1000" height="760" fill="url(#mtnSky)"/>
     <ellipse cx="175" cy="86" rx="56" ry="23" fill="#fff" opacity=".7"/>
     <ellipse cx="216" cy="76" rx="38" ry="19" fill="#fff" opacity=".7"/>
     <ellipse cx="828" cy="126" rx="50" ry="20" fill="#fff" opacity=".6"/>
     <polygon fill="url(#mtnRock)" stroke="#6b5d52" stroke-width="6" stroke-linejoin="round"
-      points="20,600 60,500 133.3,431.7 206.7,363.3 243.3,329.2 316.7,260.8 390,192.5 463.3,124.2 500,90 536.7,124.2 610,192.5 683.3,260.8 756.7,329.2 793.3,363.3 866.7,431.7 940,500 980,600"/>
+      points="20,760 60,500 133.3,431.7 206.7,363.3 243.3,329.2 316.7,260.8 390,192.5 463.3,124.2 500,90 536.7,124.2 610,192.5 683.3,260.8 756.7,329.2 793.3,363.3 866.7,431.7 940,500 980,760"/>
     <g clip-path="url(#mtnPeakClip)">
       <polygon fill="#F6FAFB" opacity=".95"
         points="408,190 463.3,124.2 500,90 536.7,124.2 592,190 556,182 530,196 500,176 470,196 444,182"/>
     </g>
     <polygon fill="#000" opacity=".08"
-      points="500,90 536.7,124.2 610,192.5 683.3,260.8 756.7,329.2 793.3,363.3 866.7,431.7 940,500 980,600 500,600"/>
+      points="500,90 536.7,124.2 610,192.5 683.3,260.8 756.7,329.2 793.3,363.3 866.7,431.7 940,500 980,760 500,760"/>
     <g id="mtnLedges"></g>
     <g id="mtnLabels"></g>
     <g id="mtnFlag"></g>
