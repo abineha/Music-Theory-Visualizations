@@ -1,9 +1,12 @@
 import { CONCEPTS } from '../data/concepts.js';
 import { isVisited, isQuizPassed } from '../core/progress.js';
 import { PANEL_SIZE, getPanelList, getConceptPosition } from '../core/config.js';
+import { goat } from './goat.js';
+import { PROXIMITY_RADIUS, findNearestNodeInRange } from './nodes.js';
+import { getBeatPhase, getBarPhase, isAudioReady, playDrumHit, playInstrumentNote } from '../core/audioEngine.js';
 
 const TEXTURE_PX = 1800;  
-const NODE_MARKER_SIZE = 140;  
+const NODE_MARKER_SIZE = 180;
 
 function loadImage(src) {
   const img = new Image();
@@ -12,6 +15,103 @@ function loadImage(src) {
 }
 
 const nodeMarkerImage = loadImage('assets/images/node-marker.svg');
+
+const NODE1_CONCEPT_ID = 'beat-tempo';
+const NODE1_FRAMES = {
+  undone: [
+    loadImage('assets/images/node1/goat-a.png'),
+    loadImage('assets/images/node1/goat-b.png'),
+  ],
+  done: [
+    loadImage('assets/images/node1/goat-a-done.png'),
+    loadImage('assets/images/node1/goat-b-done.png'),
+  ],
+};
+const NODE1_BEAT_HIT_PHASE = 0.18;
+const NODE1_BOB_AMPLITUDE = 6;
+const NODE1_BOB_PERIOD_MS = 260;
+const NODE1_HIT_MIN_VELOCITY = 0.12; // quietest audible hit, at the edge of proximity range
+let node1WasDownPose = false;
+
+const NODE2_CONCEPT_ID = 'rhythm-patterns';
+const NODE2_FRAMES = {
+  undone: [
+    loadImage('assets/images/node2/goat-a.png'),
+    loadImage('assets/images/node2/goat-b.png'),
+  ],
+  done: [
+    loadImage('assets/images/node2/goat-a-done.png'),
+    loadImage('assets/images/node2/goat-b-done.png'),
+  ],
+};
+const NODE2_BEAT_HIT_PHASE = 0.18;
+const NODE2_BOB_AMPLITUDE = 6;
+const NODE2_BOB_PERIOD_MS = 260;
+const NODE2_HIT_MIN_VELOCITY = 0.12;
+// The tresillo: a 3-3-2 syncopated grouping across 8 eighth-notes (kick on
+// steps 0, 3, 6). It's the rhythmic cell behind reggaeton's dembow, the Bo
+// Diddley beat, and a lot of "why can't I stop nodding to this" mechanical
+// loops (washing machines included) - one accented kick per group, hats
+// filling the rest, repeating every bar.
+const NODE2_RHYTHM_PATTERN = [
+  { type: 'low',  volume: 1.0 },
+  { type: 'high', volume: 0.35 },
+  { type: 'high', volume: 0.35 },
+  { type: 'low',  volume: 1.0 },
+  { type: 'high', volume: 0.35 },
+  { type: 'high', volume: 0.35 },
+  { type: 'low',  volume: 1.0 },
+  { type: 'high', volume: 0.45 },
+];
+let node2LastStepIndex = -1;
+
+const NODE3_CONCEPT_ID = 'pitch-high-low';
+const NODE3_FRAMES = {
+  undone: [
+    loadImage('assets/images/node3/goat-a.png'),
+    loadImage('assets/images/node3/goat-b.png'),
+  ],
+  done: [
+    loadImage('assets/images/node3/goat-a-done.png'),
+    loadImage('assets/images/node3/goat-b-done.png'),
+  ],
+};
+const NODE3_BEAT_HIT_PHASE = 0.18;
+const NODE3_BOB_AMPLITUDE = 6;
+const NODE3_BOB_PERIOD_MS = 260;
+// Do Re Mi Fa So La Ti Do, climbed then mirrored back down - same scale
+// pattern as the mountain toy itself (semitone offsets from the tonic).
+const NODE3_SCALE_SEMIS = [0, 2, 4, 5, 7, 9, 11, 12, 11, 9, 7, 5, 4, 2, 0];
+const NODE3_CHROMATIC_NOTES = ['C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4', 'C5'];
+const NODE3_HIT_MIN_VELOCITY = 0.12; // quietest audible note, at the edge of proximity range
+let node3ScaleIndex = 0;
+let node3LastBeatPhase = 0;
+
+const NODE4_CONCEPT_ID = 'loud-soft';
+const NODE4_FRAMES = {
+  undone: [
+    loadImage('assets/images/node4/goat-a.png'),
+    loadImage('assets/images/node4/goat-b.png'),
+  ],
+  done: [
+    loadImage('assets/images/node4/goat-a-done.png'),
+    loadImage('assets/images/node4/goat-b-done.png'),
+  ],
+};
+const NODE4_BEAT_HIT_PHASE = 0.18;
+const NODE4_BOB_AMPLITUDE = 6;
+const NODE4_BOB_PERIOD_MS = 260;
+const NODE4_MELODY = ['E4', 'G4', 'E4', 'C4'];
+const NODE4_SOFT_VELOCITY = 0.15;
+const NODE4_LOUD_VELOCITY = 0.95;
+const NODE4_PROXIMITY_MIN_SCALE = 0.15; // even the "loud" pass fades near the edge of range
+let node4MelodyIndex = 0;
+let node4IsLoudPass = false;
+let node4LastBeatPhase = 0;
+
+function prefersReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
 
 const PANEL_TEXTURES = {
   hub:   { src: 'assets/images/world/hub.png', filter: 'saturate(0.5) brightness(0.92)' },
@@ -236,6 +336,20 @@ function drawSingleNode(ctx, concept, cameraX, cameraY, viewWidth, viewHeight) {
     return;
   }
 
+  if (concept.id === NODE1_CONCEPT_ID) {
+    drawNode1(ctx, concept, x, y, screenX, screenY);
+  } else if (concept.id === NODE2_CONCEPT_ID) {
+    drawNode2(ctx, concept, x, y, screenX, screenY);
+  } else if (concept.id === NODE3_CONCEPT_ID) {
+    drawNode3(ctx, concept, x, y, screenX, screenY);
+  } else if (concept.id === NODE4_CONCEPT_ID) {
+    drawNode4(ctx, concept, x, y, screenX, screenY);
+  } else {
+    drawGenericNode(ctx, concept, screenX, screenY);
+  }
+}
+
+function drawGenericNode(ctx, concept, screenX, screenY) {
   ctx.drawImage(
     nodeMarkerImage,
     screenX - NODE_MARKER_SIZE / 2,
@@ -249,12 +363,264 @@ function drawSingleNode(ctx, concept, cameraX, cameraY, viewWidth, viewHeight) {
   ctx.textAlign = 'center';
 
   if (isQuizPassed(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE + 15, '★', '#f4c95d');
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
   } else if (isVisited(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE + 15, '✓', '#5a8a3f');
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
   }
 
-  ctx.fillText(concept.title, screenX, screenY + 20);
+  ctx.fillText(concept.title, screenX, screenY + 40);
+}
+
+function drawNode1(ctx, concept, worldX, worldY, screenX, screenY) {
+  const isDone = isVisited(concept.id);
+  const reducedMotion = prefersReducedMotion();
+  const animate = !reducedMotion && isAudioReady();
+  const pair = isDone ? NODE1_FRAMES.done : NODE1_FRAMES.undone;
+  const beatPhase = animate ? getBeatPhase() : 0;
+  const isDownPose = animate && beatPhase < NODE1_BEAT_HIT_PHASE;
+  const frame = isDownPose ? pair[1] : pair[0];
+
+  let bobOffset = 0;
+  let inRange = false;
+  let proximityRatio = 0;
+  if (!reducedMotion) {
+    const dx = worldX - goat.x;
+    const dy = worldY - goat.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    inRange = distance <= PROXIMITY_RADIUS;
+    if (inRange) {
+      bobOffset = Math.sin(performance.now() / NODE1_BOB_PERIOD_MS) * NODE1_BOB_AMPLITUDE;
+      proximityRatio = 1 - Math.min(distance / PROXIMITY_RADIUS, 1);
+    }
+  }
+
+  const poseChanged = isDownPose !== node1WasDownPose;
+  node1WasDownPose = isDownPose;
+
+  // Only the single nearest node may trigger sound this frame - proximity
+  // zones for adjacent nodes can overlap, and two nodes firing the same
+  // shared synth in one frame throws a Tone.js scheduling error.
+  const isNearest = inRange && findNearestNodeInRange(goat.x, goat.y)?.id === concept.id;
+
+  if (animate && isNearest && poseChanged) {
+    const eased = proximityRatio * proximityRatio;
+    const velocity = NODE1_HIT_MIN_VELOCITY + eased * (1 - NODE1_HIT_MIN_VELOCITY);
+    if (isDownPose) {
+      playDrumHit('low', velocity);  
+    } else {
+      playDrumHit('high', velocity); 
+    }
+  }
+
+  const spriteScreenY = screenY + bobOffset;
+
+  if (frame.complete && frame.naturalWidth > 0) {
+    ctx.drawImage(
+      frame,
+      screenX - NODE_MARKER_SIZE / 2,
+      spriteScreenY - NODE_MARKER_SIZE,
+      NODE_MARKER_SIZE,
+      NODE_MARKER_SIZE
+    );
+  }
+
+  if (isQuizPassed(concept.id)) {
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
+  } else if (isDone) {
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
+  }
+
+  ctx.fillStyle = '#412402';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${concept.order}: ${concept.title}`, screenX, screenY + 40);
+}
+
+function drawNode2(ctx, concept, worldX, worldY, screenX, screenY) {
+  const isDone = isVisited(concept.id);
+  const reducedMotion = prefersReducedMotion();
+  const animate = !reducedMotion && isAudioReady();
+  const pair = isDone ? NODE2_FRAMES.done : NODE2_FRAMES.undone;
+  const beatPhase = animate ? getBeatPhase() : 0;
+  const isDownPose = animate && beatPhase < NODE2_BEAT_HIT_PHASE;
+  const frame = isDownPose ? pair[1] : pair[0];
+
+  let bobOffset = 0;
+  let inRange = false;
+  let proximityRatio = 0;
+  if (!reducedMotion) {
+    const dx = worldX - goat.x;
+    const dy = worldY - goat.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    inRange = distance <= PROXIMITY_RADIUS;
+    if (inRange) {
+      bobOffset = Math.sin(performance.now() / NODE2_BOB_PERIOD_MS) * NODE2_BOB_AMPLITUDE;
+      proximityRatio = 1 - Math.min(distance / PROXIMITY_RADIUS, 1);
+    }
+  }
+
+  const isNearest = inRange && findNearestNodeInRange(goat.x, goat.y)?.id === concept.id;
+  if (animate) {
+    const stepIndex = Math.floor(getBarPhase() * NODE2_RHYTHM_PATTERN.length) % NODE2_RHYTHM_PATTERN.length;
+    if (stepIndex !== node2LastStepIndex) {
+      if (isNearest) {
+        const eased = proximityRatio * proximityRatio;
+        const proximityScale = NODE2_HIT_MIN_VELOCITY + eased * (1 - NODE2_HIT_MIN_VELOCITY);
+        const step = NODE2_RHYTHM_PATTERN[stepIndex];
+        playDrumHit(step.type, step.volume * proximityScale);
+      }
+      node2LastStepIndex = stepIndex;
+    }
+  }
+
+  const spriteScreenY = screenY + bobOffset;
+
+  if (frame.complete && frame.naturalWidth > 0) {
+    ctx.drawImage(
+      frame,
+      screenX - NODE_MARKER_SIZE / 2,
+      spriteScreenY - NODE_MARKER_SIZE,
+      NODE_MARKER_SIZE,
+      NODE_MARKER_SIZE
+    );
+  }
+
+  if (isQuizPassed(concept.id)) {
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
+  } else if (isDone) {
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
+  }
+
+  ctx.fillStyle = '#412402';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${concept.order}: ${concept.title}`, screenX, screenY + 40);
+}
+
+function drawNode3(ctx, concept, worldX, worldY, screenX, screenY) {
+  const isDone = isVisited(concept.id);
+  const reducedMotion = prefersReducedMotion();
+  const animate = !reducedMotion && isAudioReady();
+  const pair = isDone ? NODE3_FRAMES.done : NODE3_FRAMES.undone;
+  const beatPhase = animate ? getBeatPhase() : 0;
+  const isDownPose = animate && beatPhase < NODE3_BEAT_HIT_PHASE;
+  const frame = isDownPose ? pair[1] : pair[0];
+
+  let bobOffset = 0;
+  let inRange = false;
+  let proximityRatio = 0;
+  if (!reducedMotion) {
+    const dx = worldX - goat.x;
+    const dy = worldY - goat.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    inRange = distance <= PROXIMITY_RADIUS;
+    if (inRange) {
+      bobOffset = Math.sin(performance.now() / NODE3_BOB_PERIOD_MS) * NODE3_BOB_AMPLITUDE;
+      proximityRatio = 1 - Math.min(distance / PROXIMITY_RADIUS, 1);
+    }
+  }
+
+  const isNearest = inRange && findNearestNodeInRange(goat.x, goat.y)?.id === concept.id;
+  if (animate) {
+    if (beatPhase < node3LastBeatPhase) {
+      if (isNearest) {
+        const eased = proximityRatio * proximityRatio;
+        const velocity = NODE3_HIT_MIN_VELOCITY + eased * (1 - NODE3_HIT_MIN_VELOCITY);
+        const semi = NODE3_SCALE_SEMIS[node3ScaleIndex];
+        playInstrumentNote(NODE3_CHROMATIC_NOTES[semi], velocity);
+      }
+      node3ScaleIndex = (node3ScaleIndex + 1) % NODE3_SCALE_SEMIS.length;
+    }
+    node3LastBeatPhase = beatPhase;
+  }
+
+  const spriteScreenY = screenY + bobOffset;
+
+  if (frame.complete && frame.naturalWidth > 0) {
+    ctx.drawImage(
+      frame,
+      screenX - NODE_MARKER_SIZE / 2,
+      spriteScreenY - NODE_MARKER_SIZE,
+      NODE_MARKER_SIZE,
+      NODE_MARKER_SIZE
+    );
+  }
+
+  if (isQuizPassed(concept.id)) {
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
+  } else if (isDone) {
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
+  }
+
+  ctx.fillStyle = '#412402';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${concept.order}: ${concept.title}`, screenX, screenY + 40);
+}
+
+function drawNode4(ctx, concept, worldX, worldY, screenX, screenY) {
+  const isDone = isVisited(concept.id);
+  const reducedMotion = prefersReducedMotion();
+  const animate = !reducedMotion && isAudioReady();
+  const pair = isDone ? NODE4_FRAMES.done : NODE4_FRAMES.undone;
+  const beatPhase = animate ? getBeatPhase() : 0;
+  const isDownPose = animate && beatPhase < NODE4_BEAT_HIT_PHASE;
+  const frame = isDownPose ? pair[1] : pair[0];
+
+  let bobOffset = 0;
+  let inRange = false;
+  let proximityRatio = 0;
+  if (!reducedMotion) {
+    const dx = worldX - goat.x;
+    const dy = worldY - goat.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    inRange = distance <= PROXIMITY_RADIUS;
+    if (inRange) {
+      bobOffset = Math.sin(performance.now() / NODE4_BOB_PERIOD_MS) * NODE4_BOB_AMPLITUDE;
+      proximityRatio = 1 - Math.min(distance / PROXIMITY_RADIUS, 1);
+    }
+  }
+
+  const isNearest = inRange && findNearestNodeInRange(goat.x, goat.y)?.id === concept.id;
+  if (animate) {
+    if (beatPhase < node4LastBeatPhase) {
+      if (isNearest) {
+        const eased = proximityRatio * proximityRatio;
+        const proximityScale = NODE4_PROXIMITY_MIN_SCALE + eased * (1 - NODE4_PROXIMITY_MIN_SCALE);
+        const baseVelocity = node4IsLoudPass ? NODE4_LOUD_VELOCITY : NODE4_SOFT_VELOCITY;
+        playInstrumentNote(NODE4_MELODY[node4MelodyIndex], baseVelocity * proximityScale);
+      }
+      node4MelodyIndex++;
+      if (node4MelodyIndex >= NODE4_MELODY.length) {
+        node4MelodyIndex = 0;
+        node4IsLoudPass = !node4IsLoudPass;
+      }
+    }
+    node4LastBeatPhase = beatPhase;
+  }
+
+  const spriteScreenY = screenY + bobOffset;
+
+  if (frame.complete && frame.naturalWidth > 0) {
+    ctx.drawImage(
+      frame,
+      screenX - NODE_MARKER_SIZE / 2,
+      spriteScreenY - NODE_MARKER_SIZE,
+      NODE_MARKER_SIZE,
+      NODE_MARKER_SIZE
+    );
+  }
+
+  if (isQuizPassed(concept.id)) {
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
+  } else if (isDone) {
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
+  }
+
+  ctx.fillStyle = '#412402';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${concept.order}: ${concept.title}`, screenX, screenY + 40);
 }
 
 export const SCENE_ENTITIES = [

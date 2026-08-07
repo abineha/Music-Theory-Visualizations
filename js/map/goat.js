@@ -3,7 +3,7 @@ import { isKeyDown } from '../core/input.js';
 import { CONCEPTS } from '../data/concepts.js';
 import { setWalking } from '../core/audioEngine.js';
 
-export const NODE_BLOCK_HALF_SIZE = 50;  
+export const NODE_BLOCK_HALF_SIZE = 65; // matches the larger node markers
 const EDGE_INSET = 70; 
 function loadImage(src) {
   const img = new Image();
@@ -30,7 +30,7 @@ const SHADOW_OFFSET_X = -8;
 
 const CLICK_TARGET_ARRIVE_DISTANCE = 8;
 const CLICK_TARGET_TIMEOUT = 4;
-const TARGET_MARKER_COLOR = '176, 224, 158';
+const TARGET_MARKER_COLOR = '255, 7, 58';
 const TARGET_PULSE_SPEED = 3;
 
 const SPAWN_X = 0;

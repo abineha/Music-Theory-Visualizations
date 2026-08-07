@@ -1,4 +1,5 @@
-import { duckBacktrack, restoreBacktrack, setWalking, pauseBaa, resumeBaa } from '../core/audioEngine.js';
+import { duckBacktrack, restoreBacktrack, pauseBacktrack, resumeBacktrack, setWalking, pauseBaa, resumeBaa } from '../core/audioEngine.js';
+import { markVisited, markUnvisited, isVisited } from '../core/progress.js';
 import { renderNotation } from './notation.js';
 import { renderKeyboard } from './instruments/keyboard.js';
 import { renderDrumPad } from './instruments/drumPad.js';
@@ -10,7 +11,10 @@ import { renderWheelToy } from './toys/wheelToy.js';
 import { renderStackingToy } from './toys/stackingToy.js';
 import { renderComposerToy } from './toys/composerToy.js';
 import { renderQuiz } from './quiz.js';
-import { markVisited } from '../core/progress.js';
+import { renderBeatArcToy, stopBeatArcToy } from './toys/beatArcToy.js';
+import { renderRhythmStackToy, stopRhythmStackToy } from './toys/rhythmStackToy.js';
+import { renderMountainToy, stopMountainToy } from './toys/mountainToy.js';
+import { renderVoiceToy, stopVoiceToy } from './toys/voiceToy.js';
 
 
 const overlay = document.getElementById('popup-overlay');
@@ -21,8 +25,13 @@ const tabs = document.querySelectorAll('.popup-tab');
 const panels = document.querySelectorAll('.popup-panel-body');
 const toyContainer = document.getElementById('toy-container');
 const quizContainer = document.getElementById('quiz-container');
+const completeButton = document.getElementById('popup-complete');
 
 let open = false;
+
+let currentConcept = null;
+
+const SILENCE_BACKTRACK = new Set(['beat-tempo', 'rhythm-patterns']);
 
 export function isPopupOpen() {
   return open;
@@ -77,32 +86,65 @@ function renderToy(concept) {
     renderStackingToy(toyContainer, config);
   } else if (type === 'composer-toy') {
     renderComposerToy(toyContainer, config);
+  } else if (type === 'beat-arc-toy') {
+    renderBeatArcToy(toyContainer, config);
+  } else if (type === 'herd-stack-toy') {
+    renderRhythmStackToy(toyContainer, config);
+  } else if (type === 'mountain-toy') {
+    renderMountainToy(toyContainer, config);
+  } else if (type === 'voice-toy') {
+    renderVoiceToy(toyContainer, config);
   } else {
     toyContainer.innerHTML = 'No toy for this concept yet.';
   }
 }
 
+function refreshCompleteButton(concept) {
+  const done = isVisited(concept.id);
+  completeButton.setAttribute('aria-pressed', String(done));
+  completeButton.classList.toggle('is-done', done);
+  completeButton.querySelector('.popup-complete__label').textContent =
+    done ? 'Done! Tap to undo' : 'Mark as done';
+}
+
+completeButton.addEventListener('click', () => {
+  if (!currentConcept) return;
+  const done = isVisited(currentConcept.id);
+  if (done) markUnvisited(currentConcept.id);
+  else markVisited(currentConcept.id);
+  refreshCompleteButton(currentConcept);
+});
+
 export function openPopup(concept) {
+  currentConcept = concept;
   titleEl.textContent = concept.title;
   definitionEl.textContent = concept.definition;
   renderNotation(concept);
   renderInstrument(concept);
   renderToy(concept);
   renderQuiz(quizContainer, concept);
-  markVisited(concept.id);
+  refreshCompleteButton(concept);
   overlay.classList.remove('hidden');
   open = true;
-  setActiveSection('toy'); // kids always start on the interactive toy
+  setActiveSection('toy'); // start on the interactive toy
   setWalking(false);
   pauseBaa();
-  duckBacktrack();
+  if (SILENCE_BACKTRACK.has(concept.id)) {
+    pauseBacktrack();
+  } else {
+    duckBacktrack();
+  }
 }
 
 export function closePopup() {
   overlay.classList.add('hidden');
   open = false;
   resumeBaa();
-  restoreBacktrack();
+  resumeBacktrack();
+  stopBeatArcToy();
+  stopRhythmStackToy();
+  stopMountainToy();
+  stopVoiceToy();
 }
 
 closeButton.addEventListener('click', closePopup);

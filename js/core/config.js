@@ -10,10 +10,10 @@ export const SECTION_DIRECTION = {
 };
 
 const PAD_OFFSETS = {
-  left:  [{ x: 170,  y: 60 },   { x: -170, y: -50 }],
-  right: [{ x: -170, y: -50 },  { x: 170,  y: 60 }],
-  up:    [{ x: 60,   y: 170 },  { x: -50,  y: -170 }],
-  down:  [{ x: -50,  y: -170 }, { x: 60,   y: 170 }],
+  left:  [{ x: 260,  y: 90 },   { x: -260, y: -75 }],
+  right: [{ x: -260, y: -75 },  { x: 260,  y: 90 }],
+  up:    [{ x: 90,   y: 260 },  { x: -75,  y: -260 }],
+  down:  [{ x: -75,  y: -260 }, { x: 90,   y: 260 }],
 };
 
 function getPanelCentre(direction, index) {

@@ -19,6 +19,11 @@ export function markVisited(conceptId) {
   saveProgress();
 }
 
+export function markUnvisited(conceptId) {
+  progress[conceptId] = { ...progress[conceptId], visited: false };
+  saveProgress();
+}
+
 export function markQuizPassed(conceptId) {
   progress[conceptId] = { ...progress[conceptId], quizPassed: true };
   saveProgress();

@@ -60,7 +60,7 @@ function renderChoiceQuiz(container, config, playable, conceptId) {
     optionButton.textContent = optionText;
     optionButton.addEventListener('click', () => {
       const correct = i === correctIndex;
-      feedbackEl.textContent = correct ? 'Great job!' : 'Not quite — try again!';
+      feedbackEl.textContent = correct ? 'Great job!' : 'Not quite! Try again!';
       feedbackEl.className = 'quiz-feedback ' + (correct ? 'correct' : 'incorrect');
       optionButton.classList.add(correct ? 'correct' : 'incorrect');
       if (correct) markQuizPassed(conceptId);
@@ -106,7 +106,7 @@ function renderTapTheBeatQuiz(container, config, conceptId) {
       const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
       const diff = Math.abs(avg - targetIntervalMs);
       const correct = diff < targetIntervalMs * 0.3;
-      feedbackEl.textContent = correct ? 'Great timing!' : 'Try to keep a steadier beat — tap again!';
+      feedbackEl.textContent = correct ? 'Great timing!' : 'Try to keep a steadier beat! Tap again!';
       feedbackEl.className = 'quiz-feedback ' + (correct ? 'correct' : 'incorrect');
       if (correct) markQuizPassed(conceptId);
       tapTimes.length = 0;
@@ -171,7 +171,7 @@ function renderListenAndOrderQuiz(container, config, conceptId) {
 
       if (userOrder.length === sequence.length) {
         const correct = sequence.every((original, i) => original === userOrder[i]);
-        feedbackEl.textContent = correct ? 'Perfect order!' : 'Not quite the right order — try again!';
+        feedbackEl.textContent = correct ? 'Perfect order!' : 'Not quite the right order! Try again!';
         feedbackEl.className = 'quiz-feedback ' + (correct ? 'correct' : 'incorrect');
         if (correct) markQuizPassed(conceptId);
       }
