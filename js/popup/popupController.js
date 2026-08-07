@@ -12,6 +12,7 @@ import { renderStackingToy } from './toys/stackingToy.js';
 import { renderComposerToy } from './toys/composerToy.js';
 import { renderQuiz } from './quiz.js';
 import { renderBeatArcToy, stopBeatArcToy } from './toys/beatArcToy.js';
+import { renderRhythmStackToy, stopRhythmStackToy } from './toys/rhythmStackToy.js';
 
 
 const overlay = document.getElementById('popup-overlay');
@@ -85,6 +86,8 @@ function renderToy(concept) {
     renderComposerToy(toyContainer, config);
   } else if (type === 'beat-arc-toy') {
     renderBeatArcToy(toyContainer, config);
+  } else if (type === 'herd-stack-toy') {
+    renderRhythmStackToy(toyContainer, config);
   } else {
     toyContainer.innerHTML = 'No toy for this concept yet.';
   }
@@ -117,7 +120,7 @@ export function openPopup(concept) {
   refreshCompleteButton(concept);
   overlay.classList.remove('hidden');
   open = true;
-  setActiveSection('toy'); // always start on the interactive toy
+  setActiveSection('toy'); // start on the interactive toy
   setWalking(false);
   pauseBaa();
   if (SILENCE_BACKTRACK.has(concept.id)) {
@@ -133,6 +136,7 @@ export function closePopup() {
   resumeBaa();
   resumeBacktrack();
   stopBeatArcToy();
+  stopRhythmStackToy();
 }
 
 closeButton.addEventListener('click', closePopup);

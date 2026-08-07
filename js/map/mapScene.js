@@ -281,9 +281,9 @@ function drawGenericNode(ctx, concept, screenX, screenY) {
   ctx.textAlign = 'center';
 
   if (isQuizPassed(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE + 15, '★', '#f4c95d');
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
   } else if (isVisited(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE + 15, '✓', '#5a8a3f');
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
   }
 
   ctx.fillText(concept.title, screenX, screenY + 20);
@@ -316,14 +316,12 @@ function drawNode1(ctx, concept, worldX, worldY, screenX, screenY) {
   node1WasDownPose = isDownPose;
 
   if (animate && inRange && poseChanged) {
-    // Same ease-in curve as the generic proximity tone: quiet for most of the
-    // approach, ramping up noticeably only right as Sully arrives.
     const eased = proximityRatio * proximityRatio;
     const velocity = NODE1_HIT_MIN_VELOCITY + eased * (1 - NODE1_HIT_MIN_VELOCITY);
     if (isDownPose) {
-      playDrumHit('low', velocity);  // the "hit" moment — drum
+      playDrumHit('low', velocity);  
     } else {
-      playDrumHit('high', velocity); // back to resting — cymbal
+      playDrumHit('high', velocity); 
     }
   }
 
@@ -340,9 +338,9 @@ function drawNode1(ctx, concept, worldX, worldY, screenX, screenY) {
   }
 
   if (isQuizPassed(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE + 15, '★', '#f4c95d');
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
   } else if (isDone) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE + 15, '✓', '#5a8a3f');
+    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
   }
 
   ctx.fillStyle = '#412402';

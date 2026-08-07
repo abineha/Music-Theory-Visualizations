@@ -919,7 +919,6 @@ html, body {
   }
 }
 
-/* Sky-to-grass scene, checkerboard grass like a little diorama behind Sully */
 .beat-toy__scene {
   position: relative;
   width: 100%;
@@ -934,8 +933,6 @@ html, body {
 }
 
 .beat-toy__scene::after {
-  /* checkerboard grass texture, confined to the lower (grass) portion;
-     scrolled continuously via --grass-scroll (set in JS) for a treadmill effect */
   content: '';
   position: absolute;
   inset: 58% 0 0 0;
@@ -1126,5 +1123,171 @@ html, body {
   15% { opacity: 1; transform: translate(-50%, -8px) scale(1.05); }
   70% { opacity: 1; transform: translate(-50%, -22px) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -32px) scale(0.95); }
+}
+
+.rhythm-toy {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "herd wall";
+  gap: 14px;
+  padding-top: 8px;
+}
+
+@media (max-width: 760px) {
+  .rhythm-toy {
+    grid-template-columns: 1fr;
+    grid-template-areas: "herd" "wall";
+  }
+}
+
+.rhythm-toy__herd-panel {
+  grid-area: herd;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.rhythm-toy__wall-panel {
+  grid-area: wall;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.rhythm-toy__herd-box {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  padding: 6px 12px;
+  width: 100%;
+}
+
+.rhythm-toy__row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+  border-bottom: 2px dashed rgba(107, 93, 82, 0.15);
+}
+
+.rhythm-toy__row:last-child {
+  border-bottom: none;
+}
+
+.rhythm-toy__goat {
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 12px;
+  transition: background-color 0.15s ease;
+}
+
+.rhythm-toy__goat:hover {
+  background: rgba(107, 93, 82, 0.08);
+}
+
+.rhythm-toy__goat:focus-visible {
+  outline: 3px solid var(--success-strong);
+  outline-offset: 3px;
+}
+
+.rhythm-toy__goat img {
+  display: block;
+  filter: grayscale(1) opacity(0.4);
+  transition: filter 0.15s ease;
+}
+
+.rhythm-toy__goat.is-active img {
+  filter: none;
+}
+
+.rhythm-toy__goat-name {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--ink);
+}
+
+.rhythm-toy__goat-hits {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.rhythm-toy__track {
+  flex: 1;
+  min-width: 0;
+}
+
+.rhythm-toy__cells {
+  display: flex;
+  gap: 3px;
+  height: 34px;
+}
+
+.rhythm-toy__cell {
+  flex: 1;
+  border-radius: 6px;
+  background: rgba(107, 93, 82, 0.09);
+  border: 2px solid transparent;
+  transition: background-color 0.1s ease;
+}
+
+.rhythm-toy__cell.is-on {
+  background: var(--button-bg);
+}
+
+.rhythm-toy__cell.is-hit {
+  background: var(--accent-strong);
+  border-color: var(--ink);
+}
+
+.rhythm-toy__cell-label {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  margin-top: 3px;
+}
+
+.rhythm-toy__prompt {
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: var(--ink-soft);
+  min-height: 1.3em;
+  margin-top: 2px;
+}
+
+.rhythm-toy__flash {
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: var(--success-strong);
+  min-height: 1.4em;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.rhythm-toy__flash.is-visible {
+  opacity: 1;
+}
+
+.rhythm-toy__sum {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--ink);
+  margin-top: -4px;
+}
+
+.rhythm-toy__wall-svg {
+  max-width: 100%;
+  height: auto;
 }
 

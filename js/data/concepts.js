@@ -6,7 +6,7 @@ export const CONCEPTS = [
     quiz: { type: 'tap-the-beat', config: { label: 'Tap 4 times at a steady, medium pace!', targetBpm: 100, tapsRequired: 4 } } },
   { id: 'rhythm-patterns',   section: 'foundations', order: 2,  title: 'Rhythm Patterns',
     definition: 'Rhythm is a pattern of long and short sounds and silences, layered on top of the beat.',
-    toy: { type: 'tap-toy', config: { label: 'Tap out your own rhythm!' } },
+    toy: { type: 'herd-stack-toy', config: { minBpm: 50, maxBpm: 132, startBpm: 76 } },
     instrument: { type: 'drumpad' },
     quiz: { type: 'listen-and-order', config: { label: 'Listen to the pattern, then tap the sounds back in the right order!', sequence: [ { label: 'Low', notes: ['C3'] }, { label: 'Mid', notes: ['C4'] }, { label: 'High', notes: ['C5'] } ] } } },
   { id: 'pitch-high-low',    section: 'foundations', order: 3,  title: 'Pitch (High and Low)',
