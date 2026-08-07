@@ -1291,3 +1291,192 @@ html, body {
   height: auto;
 }
 
+.mountain-toy {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "climb theory";
+  gap: 14px;
+  padding-top: 8px;
+}
+
+@media (max-width: 760px) {
+  .mountain-toy {
+    grid-template-columns: 1fr;
+    grid-template-areas: "climb" "theory";
+  }
+}
+
+.mountain-toy__climb-panel {
+  grid-area: climb;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mountain-toy__theory-panel {
+  grid-area: theory;
+}
+
+.mountain-toy__mountain-box {
+  padding: 4px;
+}
+
+.mountain-toy__mountain-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.mountain-toy__readout {
+  margin-top: -2px;
+}
+
+.mountain-toy__note-label {
+  font: bold 26px "Trebuchet MS", sans-serif;
+  fill: #6b5d52;
+  text-anchor: middle;
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
+}
+
+.mountain-toy__note-label.lit {
+  opacity: 1;
+}
+
+.mountain-toy__ledge rect {
+  transition: filter 0.12s ease;
+}
+
+.mountain-toy__ledge {
+  cursor: pointer;
+}
+
+.mountain-toy__ledge:hover rect {
+  filter: brightness(1.12);
+}
+
+.mountain-toy__theory-box {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 14px 16px;
+}
+
+.mountain-toy__ruler {
+  display: flex;
+  gap: 3px;
+}
+
+.mountain-toy__ruler-slot {
+  flex: 1;
+  height: 32px;
+  border-radius: 5px;
+  background: rgba(107, 93, 82, 0.08);
+  border: 2px dashed rgba(107, 93, 82, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--ink);
+}
+
+.mountain-toy__ruler-slot.in-scale {
+  background: var(--button-bg);
+  border: 2px solid var(--ink);
+}
+
+.mountain-toy__ruler-slot.here {
+  background: var(--accent-strong);
+  border-color: var(--ink);
+}
+
+.mountain-toy__ruler-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(107, 93, 82, 0.3);
+}
+
+.mountain-toy__step-row {
+  display: flex;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.mountain-toy__step-gap {
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 0;
+  border-radius: 5px;
+}
+
+.mountain-toy__step-gap.whole {
+  color: #4f7a48;
+  background: rgba(143, 187, 134, 0.3);
+}
+
+.mountain-toy__step-gap.half {
+  color: #a3564a;
+  background: rgba(217, 156, 138, 0.35);
+}
+
+.mountain-toy__bars-heading {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.mountain-toy__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 64px;
+}
+
+.mountain-toy__bar {
+  flex: 1;
+  background: #b3a89c;
+  border: 2px solid var(--ink);
+  border-radius: 5px 5px 0 0;
+  position: relative;
+}
+
+.mountain-toy__bar.here {
+  background: var(--accent-strong);
+}
+
+.mountain-toy__bar-label {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.mountain-toy__ratio {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--ink);
+  min-height: 1.3em;
+}
+
+.mountain-toy__ratio-nums {
+  opacity: 0.65;
+  font-size: 0.8rem;
+}
+
+.mountain-toy__numbers-button {
+  align-self: center;
+  font-size: 0.8rem;
+  padding: 8px 18px;
+  margin-top: 4px;
+}
+

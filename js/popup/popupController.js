@@ -13,6 +13,7 @@ import { renderComposerToy } from './toys/composerToy.js';
 import { renderQuiz } from './quiz.js';
 import { renderBeatArcToy, stopBeatArcToy } from './toys/beatArcToy.js';
 import { renderRhythmStackToy, stopRhythmStackToy } from './toys/rhythmStackToy.js';
+import { renderMountainToy, stopMountainToy } from './toys/mountainToy.js';
 
 
 const overlay = document.getElementById('popup-overlay');
@@ -88,6 +89,8 @@ function renderToy(concept) {
     renderBeatArcToy(toyContainer, config);
   } else if (type === 'herd-stack-toy') {
     renderRhythmStackToy(toyContainer, config);
+  } else if (type === 'mountain-toy') {
+    renderMountainToy(toyContainer, config);
   } else {
     toyContainer.innerHTML = 'No toy for this concept yet.';
   }
@@ -137,6 +140,7 @@ export function closePopup() {
   resumeBacktrack();
   stopBeatArcToy();
   stopRhythmStackToy();
+  stopMountainToy();
 }
 
 closeButton.addEventListener('click', closePopup);

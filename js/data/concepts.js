@@ -11,7 +11,7 @@ export const CONCEPTS = [
     quiz: { type: 'listen-and-order', config: { label: 'Listen to the pattern, then tap the sounds back in the right order!', sequence: [ { label: 'Low', notes: ['C3'] }, { label: 'Mid', notes: ['C4'] }, { label: 'High', notes: ['C5'] } ] } } },
   { id: 'pitch-high-low',    section: 'foundations', order: 3,  title: 'Pitch (High and Low)',
     definition: "Pitch is how high or low a sound is, like the difference between a mouse's squeak and a lion's roar.",
-    toy: { type: 'slider-toy', config: { mode: 'pitch', lowNote: 'C3', highNote: 'C6', label: 'Drag to hear low and high sounds' } },
+    toy: { type: 'mountain-toy', config: {} },
     notation: { notes: 'C3/q, C6' },
     quiz: { type: 'ear-training', config: { question: 'Listen, is this pitch high or low?', playNotes: ['C6'], options: ['High', 'Low'], correctIndex: 0 } } },
   { id: 'loud-soft',         section: 'foundations', order: 4,  title: 'Loud and Soft',
