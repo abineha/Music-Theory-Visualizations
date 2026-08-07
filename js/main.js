@@ -163,8 +163,8 @@ function gameLoop(timestamp) {
     const dx = nodeX - goat.x;
     const dy = nodeY - goat.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    if (currentNearbyNode.id === 'beat-tempo') {
-      updateProximityTone(0); // node 1 has its own drum/cymbal proximity audio instead
+    if (currentNearbyNode.id === 'beat-tempo' || currentNearbyNode.id === 'rhythm-patterns' || currentNearbyNode.id === 'pitch-high-low' || currentNearbyNode.id === 'loud-soft') {
+      updateProximityTone(0); 
     } else {
       updateProximityTone(1 - Math.min(distance / PROXIMITY_RADIUS, 1));
     }

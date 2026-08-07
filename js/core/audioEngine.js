@@ -323,18 +323,31 @@ export function updateProximityTone(proximityRatio) {
   proximityOsc.volume.value = -50 + eased * 42; // near-silent at the edge, up to -8dB at the node
 }
 
+// Tone.js throws if the same voice is retriggered at a non-increasing
+// timestamp (two calls landing in the same instant). Callers should avoid
+// that (e.g. map markers only let the single nearest node trigger sound),
+// but this is a last-resort guard so a scheduling collision never crashes
+// the caller (a synchronous canvas draw loop) instead of just dropping a note.
+function safeTrigger(fn) {
+  try {
+    fn();
+  } catch (err) {
+    console.warn('Audio trigger failed:', err);
+  }
+}
+
 export function playInstrumentNote(note, velocity = 1) {
   if (!audioReady) return;
-  keyboardSynth.triggerAttackRelease(note, '8n', undefined, velocity);
+  safeTrigger(() => keyboardSynth.triggerAttackRelease(note, '8n', undefined, velocity));
 }
 
 
 export function playDrumHit(padId, velocity = 1) {
   if (!audioReady) return;
   if (padId === 'low') {
-    drumLow.triggerAttackRelease('C2', '8n', undefined, velocity);
+    safeTrigger(() => drumLow.triggerAttackRelease('C2', '8n', undefined, velocity));
   } else {
-    drumHigh.triggerAttackRelease('16n', undefined, velocity);
-    cymbalShimmer.triggerAttackRelease('16n', undefined, velocity * 0.8);
+    safeTrigger(() => drumHigh.triggerAttackRelease('16n', undefined, velocity));
+    safeTrigger(() => cymbalShimmer.triggerAttackRelease('16n', undefined, velocity * 0.8));
   }
 }

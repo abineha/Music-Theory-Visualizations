@@ -3,7 +3,7 @@ import { isKeyDown } from '../core/input.js';
 import { CONCEPTS } from '../data/concepts.js';
 import { setWalking } from '../core/audioEngine.js';
 
-export const NODE_BLOCK_HALF_SIZE = 50;  
+export const NODE_BLOCK_HALF_SIZE = 65; // matches the larger node markers
 const EDGE_INSET = 70; 
 function loadImage(src) {
   const img = new Image();

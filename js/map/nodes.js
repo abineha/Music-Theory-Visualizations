@@ -3,7 +3,7 @@ import { getConceptPosition } from '../core/config.js';
 
 export const PROXIMITY_RADIUS = 260; 
 
-export const CLICK_RADIUS = 90; // generous pointer accuracy
+export const CLICK_RADIUS = 115; // generous pointer accuracy, matches the larger node markers
 
 export function findNodeAtWorldPoint(wx, wy) {
   let best = null;
@@ -11,7 +11,7 @@ export function findNodeAtWorldPoint(wx, wy) {
 
   for (const concept of CONCEPTS) {
     const { x, y } = getConceptPosition(concept);
-    const d = Math.hypot(x - wx, (y - 70) - wy);
+    const d = Math.hypot(x - wx, (y - 90) - wy); // 90 = half of NODE_MARKER_SIZE, the marker's visual center
     if (d < bestDist) {
       best = concept;
       bestDist = d;
