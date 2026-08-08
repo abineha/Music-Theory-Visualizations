@@ -304,6 +304,43 @@ html, body {
   z-index: 1;
 }
 
+.popup-volume-control {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid var(--accent-border);
+  border-radius: 30px;
+  z-index: 1;
+}
+
+.popup-mute-button {
+  width: 30px;
+  height: 30px;
+  background: #82c683;
+}
+
+.popup-mute-button:hover {
+  background: #6fb570;
+}
+
+.popup-mute-button.muted {
+  background: #c28383;
+}
+
+.popup-mute-button img {
+  width: 16px;
+  height: 16px;
+}
+
+.popup-volume-slider {
+  width: 70px;
+}
+
 .popup-complete {
   position: absolute;
   bottom: 16px;
@@ -1318,6 +1355,17 @@ html, body {
   grid-area: theory;
 }
 
+.mountain-toy__controls {
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.mountain-toy__controls .beat-toy__start-button {
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
 .mountain-toy__mountain-box {
   padding: 4px;
 }
@@ -1336,6 +1384,10 @@ html, body {
 .mountain-toy__note-label {
   font: bold 26px "Trebuchet MS", sans-serif;
   fill: #6b5d52;
+  stroke: #fffaf2;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
   text-anchor: middle;
   opacity: 0.4;
   transition: opacity 0.15s ease;

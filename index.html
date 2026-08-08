@@ -26,7 +26,7 @@
 
       <div class="zoom-control">
         <img src="assets/images/icons/zoom.svg" alt="" class="zoom-icon">
-        <input type="range" id="zoom-slider" class="zoom-slider" min="0.5" max="1.8" step="0.05" value="1.2" aria-label="Zoom">
+        <input type="range" id="zoom-slider" class="zoom-slider" min="0.5" max="1.8" step="0.05" value="0.5" aria-label="Zoom">
       </div>
 
       <button id="home-button" class="hud-button home-button" aria-label="Return to start">
@@ -40,13 +40,21 @@
         <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="80" aria-label="Volume">
       </div>
 
-                  <div id="interact-prompt" class="interact-prompt hidden">Press SPACE to explore</div>
+                  <div id="interact-prompt" class="interact-prompt hidden">Click or press SPACE to explore</div>
                   <div id="move-hint" class="move-hint hidden">Click to move Sully</div>
 
 
       <div id="popup-overlay" class="popup-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popup-title">
         <div class="popup-panel">
           <button id="popup-close" class="popup-close" aria-label="Back to map">&larr;</button>
+
+          <div class="popup-volume-control">
+            <button id="popup-mute-button" class="hud-button popup-mute-button" aria-label="Mute">
+              <img src="assets/images/icons/unmute.svg" alt="" id="popup-mute-icon">
+            </button>
+            <input type="range" id="popup-volume-slider" class="volume-slider popup-volume-slider" min="0" max="100" value="80" aria-label="Volume">
+          </div>
+
           <button id="popup-complete" class="popup-complete" aria-pressed="false">
           <span class="popup-complete__box"></span>
           <span class="popup-complete__label">Mark as done</span>
