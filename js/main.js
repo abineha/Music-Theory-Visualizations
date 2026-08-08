@@ -4,7 +4,7 @@ import { updateGoat, drawGoat, isGoatReady, goat, getContainmentRects, NODE_BLOC
 import { getCamera, ZOOM, setZoom, screenToWorld } from './map/camera.js';
 import { findNearestNodeInRange, PROXIMITY_RADIUS, findNodeAtWorldPoint } from './map/nodes.js';
 import { openPopup, isPopupOpen } from './popup/popupController.js';
-import { initAudio, setVolume, updateProximityTone } from './core/audioEngine.js';
+import { initAudio, setAmbientVolume, setInteractiveVolume, updateProximityTone } from './core/audioEngine.js';
 import { CONCEPTS } from './data/concepts.js';
 import './core/touchControls.js';
 
@@ -12,7 +12,7 @@ const canvas = document.getElementById('map-canvas');
 const ctx = canvas.getContext('2d');
 
 const interactPrompt = document.getElementById('interact-prompt');
-const NODE_PROMPT_OFFSET = 160;
+const NODE_PROMPT_OFFSET = 195;
 let currentNearbyNode = null;
 
 const startGate = document.getElementById('start-gate');
@@ -211,7 +211,8 @@ requestAnimationFrame(gameLoop);
 
 async function handleStart() {
   await initAudio();
-  setVolume(getEffectiveVolume());
+  setAmbientVolume(getEffectiveVolume());
+  setInteractiveVolume(getEffectivePopupVolume());
   startGate.classList.add('hidden');
   gameStarted = true;
   typeDialogue("Sully the goat stretches, smiles, and looks across the village square. There's so much to explore today!");
@@ -296,36 +297,79 @@ const muteButton = document.getElementById('mute-button');
 const muteIcon = document.getElementById('mute-icon');
 const volumeSlider = document.getElementById('volume-slider');
 
+const popupMuteButton = document.getElementById('popup-mute-button');
+const popupMuteIcon = document.getElementById('popup-mute-icon');
+const popupVolumeSlider = document.getElementById('popup-volume-slider');
+
 let volume = Number(localStorage.getItem('goatVolume') ?? 80);
 let isMuted = localStorage.getItem('goatMuted') === 'true';
+let popupVolume = Number(localStorage.getItem('goatPopupVolume') ?? 80);
+let popupIsMuted = localStorage.getItem('goatPopupMuted') === 'true';
+
+let lastNonZeroVolume = volume > 0 ? volume : 80;
+let popupLastNonZeroVolume = popupVolume > 0 ? popupVolume : 80;
 
 volumeSlider.value = volume;
+popupVolumeSlider.value = popupVolume;
 updateVolumeUI();
+updatePopupVolumeUI();
 
 muteButton.addEventListener('click', () => {
   isMuted = !isMuted;
+  if (!isMuted && volume === 0) {
+    volume = lastNonZeroVolume;
+    localStorage.setItem('goatVolume', volume);
+  }
   localStorage.setItem('goatMuted', isMuted);
   updateVolumeUI();
 });
 
 volumeSlider.addEventListener('input', () => {
   volume = Number(volumeSlider.value);
+  if (volume > 0) lastNonZeroVolume = volume;
   isMuted = volume === 0;
   localStorage.setItem('goatVolume', volume);
   localStorage.setItem('goatMuted', isMuted);
   updateVolumeUI();
 });
 
+popupMuteButton.addEventListener('click', () => {
+  popupIsMuted = !popupIsMuted;
+  if (!popupIsMuted && popupVolume === 0) {
+    popupVolume = popupLastNonZeroVolume;
+    localStorage.setItem('goatPopupVolume', popupVolume);
+  }
+  localStorage.setItem('goatPopupMuted', popupIsMuted);
+  updatePopupVolumeUI();
+});
+
+popupVolumeSlider.addEventListener('input', () => {
+  popupVolume = Number(popupVolumeSlider.value);
+  if (popupVolume > 0) popupLastNonZeroVolume = popupVolume;
+  popupIsMuted = popupVolume === 0;
+  localStorage.setItem('goatPopupVolume', popupVolume);
+  localStorage.setItem('goatPopupMuted', popupIsMuted);
+  updatePopupVolumeUI();
+});
+
+function applyMuteUI(button, icon, slider, displayValue, effectivelyMuted) {
+  slider.value = displayValue;
+  updateSliderFill(slider);
+  button.classList.toggle('muted', effectivelyMuted);
+  icon.src = effectivelyMuted ? 'assets/images/icons/mute.svg' : 'assets/images/icons/unmute.svg';
+  button.setAttribute('aria-label', effectivelyMuted ? 'Unmute' : 'Mute');
+}
+
 function updateVolumeUI() {
   const effectivelyMuted = isMuted || volume === 0;
-  volumeSlider.value = effectivelyMuted ? 0 : volume;
-  updateSliderFill(volumeSlider);
-  muteButton.classList.toggle('muted', effectivelyMuted);
-  muteIcon.src = effectivelyMuted
-    ? 'assets/images/icons/mute.svg'
-    : 'assets/images/icons/unmute.svg';
-  muteButton.setAttribute('aria-label', effectivelyMuted ? 'Unmute' : 'Mute');
-  setVolume(getEffectiveVolume());
+  applyMuteUI(muteButton, muteIcon, volumeSlider, effectivelyMuted ? 0 : volume, effectivelyMuted);
+  setAmbientVolume(getEffectiveVolume());
+}
+
+function updatePopupVolumeUI() {
+  const effectivelyMuted = popupIsMuted || popupVolume === 0;
+  applyMuteUI(popupMuteButton, popupMuteIcon, popupVolumeSlider, effectivelyMuted ? 0 : popupVolume, effectivelyMuted);
+  setInteractiveVolume(getEffectivePopupVolume());
 }
 
 function updateSliderFill(slider) {
@@ -339,6 +383,10 @@ function updateSliderFill(slider) {
 
 export function getEffectiveVolume() {
   return (isMuted ? 0 : volume) / 100;
+}
+
+export function getEffectivePopupVolume() {
+  return (popupIsMuted ? 0 : popupVolume) / 100;
 }
 
 const dialogueBox = document.getElementById('dialogue-box');

@@ -8,7 +8,9 @@ const GAIT_TABLE = [
 ];
 
 const BEATS_PER_BAR = 4;
-const ZONE_HALF_WIDTH_FRACTION = 0.15 / 4; // +/- 15% of one beat: fraction of the whole bar/arc
+const ZONE_VISUAL_RADIUS_FRACTION = 0.15 / 4; 
+const ZONE_HIT_HALF_WIDTH_FRACTION = 0.25 / 4; // +/- 30% of one beat
+const ZONE_NEAR_HALF_WIDTH_FRACTION = ZONE_HIT_HALF_WIDTH_FRACTION * 1.3; // "near" band beyond the exact hit window
 const ARC_WIDTH = 380;
 const ARC_HEIGHT = 130;
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -26,7 +28,6 @@ const BEAT_DOT_BASE_RADIUS = 10;
 const BEAT_DOT_PULSE_RADIUS = 6;
 const TAP_DOT_RADIUS = 7;
 const TAP_DOT_MAX_STORED = 8;
-const TAP_DOT_NEAR_FRACTION = ZONE_HALF_WIDTH_FRACTION * 2.5; // "near" band beyond the exact hit window
 
 const PROMPT_NOT_STARTED = 'Press Start to wake Sully up!';
 const PROMPT_PLAYING = 'Click the gold patches as the light goes past!';
@@ -43,11 +44,6 @@ const BUBBLE_LINE_2 = 'The tempo is how far apart they are.';
 const GRASS_SCROLL_PX_PER_MS = 0.03; // baseline scroll speed; scaled by tempo so the ground "runs" faster with Sully
 
 const INPUT_LATENCY_MS = 90;
-
-function circularDistance(a, b) {
-  const d = Math.abs(a - b);
-  return Math.min(d, 1 - d);
-}
 
 function getGait(bpm) {
   return GAIT_TABLE.find((g) => bpm <= g.max);
@@ -156,10 +152,10 @@ export function renderBeatArcToy(container, config = {}) {
     return arcPath.getPointAtLength(fraction * totalLength);
   }
 
-  const zoneRadius = ZONE_HALF_WIDTH_FRACTION * totalLength;
+  const zoneRadius = ZONE_VISUAL_RADIUS_FRACTION * totalLength;
   const zoneCircles = [];
   for (let beat = 0; beat < BEATS_PER_BAR; beat++) {
-    const fraction = beat / BEATS_PER_BAR;
+    const fraction = (beat + 1) / BEATS_PER_BAR;
     const { x, y } = pointAtFraction(fraction);
 
     const shadow = document.createElementNS(SVG_NS, 'circle');
@@ -234,12 +230,19 @@ export function renderBeatArcToy(container, config = {}) {
     if (!running) return;
     const spb = 60 / bpm;
     const latencyFraction = (INPUT_LATENCY_MS / 1000) / spb / BEATS_PER_BAR;
-    let barPhase = getBarPhase() - latencyFraction;
-    if (barPhase < 0) barPhase += 1;
+    // Wrap cleanly into [0, 1) instead of clamping: the beat itself is
+    // circular in time (it keeps looping) even though the arc is drawn as a
+    // line, so a tap just after the bar resets is really just a bit late for
+    // the last beat, not "nowhere near" it.
+    const barPhase = (((getBarPhase() - latencyFraction) % 1) + 1) % 1;
+
     let nearest = null;
     let nearestDist = Infinity;
     for (const zone of zoneCircles) {
-      const dist = circularDistance(barPhase, zone.fraction);
+      // Circular distance: safe for beats 1-3 (wrapping around the far way
+      // is always much farther than any reasonable hit window
+      const raw = Math.abs(barPhase - zone.fraction);
+      const dist = Math.min(raw, 1 - raw);
       if (dist < nearestDist) {
         nearest = zone;
         nearestDist = dist;
@@ -247,8 +250,8 @@ export function renderBeatArcToy(container, config = {}) {
     }
 
     let quality = 'outside';
-    if (nearestDist <= ZONE_HALF_WIDTH_FRACTION) quality = 'hit';
-    else if (nearestDist <= TAP_DOT_NEAR_FRACTION) quality = 'near';
+    if (nearestDist <= ZONE_HIT_HALF_WIDTH_FRACTION) quality = 'hit';
+    else if (nearestDist <= ZONE_NEAR_HALF_WIDTH_FRACTION) quality = 'near';
 
     addTapDot(barPhase, quality);
     showFeedback(quality);
@@ -359,10 +362,10 @@ export function renderBeatArcToy(container, config = {}) {
     numberLabel.setAttribute('font-weight', 'bold');
     numberLabel.setAttribute('fill', '#6b5d52');
     numberLabel.setAttribute('pointer-events', 'none');
-    numberLabel.textContent = String(i + 1);
+    numberLabel.textContent = String(i);
     graphSvg.appendChild(numberLabel);
 
-    beatDots.push({ fraction, element: dot });
+    beatDots.push({ fraction, element: dot, isBeat: i > 0 });
   }
 
   const gapLabels = [];
@@ -542,8 +545,9 @@ export function renderBeatArcToy(container, config = {}) {
     playhead.setAttribute('opacity', '0.9');
 
     for (const beatDot of beatDots) {
-      const dist = circularDistance(barPhaseNow, beatDot.fraction);
-      const closeness = Math.max(0, 1 - dist / ZONE_HALF_WIDTH_FRACTION);
+      if (!beatDot.isBeat) continue;
+      const dist = Math.abs(barPhaseNow - beatDot.fraction);
+      const closeness = Math.max(0, 1 - dist / ZONE_HIT_HALF_WIDTH_FRACTION);
       beatDot.element.setAttribute('r', String(BEAT_DOT_BASE_RADIUS + closeness * BEAT_DOT_PULSE_RADIUS));
       beatDot.element.setAttribute('fill', closeness > 0 ? '#f7e6c4' : '#e8c98f');
     }

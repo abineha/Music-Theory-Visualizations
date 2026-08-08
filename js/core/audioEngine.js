@@ -20,26 +20,29 @@ const HERD_LAYERS = [
   { key: 'six',     note: 'F#5', everySteps: 1,  dur: 0.07 },
 ];
 
-const backtrack = new Tone.Player({ url: 'assets/sounds/backtrack.mp3', loop: true }).toDestination();
+const ambientBus = new Tone.Volume(0).toDestination();
+const interactiveBus = new Tone.Volume(0).toDestination();
+
+const backtrack = new Tone.Player({ url: 'assets/sounds/backtrack.mp3', loop: true }).connect(ambientBus);
 backtrack.volume.value = BACKTRACK_VOLUME;
 
-const baaPlayer = new Tone.Player('assets/sounds/goat_baa.mp3').toDestination();
+const baaPlayer = new Tone.Player('assets/sounds/goat_baa.mp3').connect(ambientBus);
 baaPlayer.volume.value = -20;
 
-const stepPlayer = new Tone.Player({ url: 'assets/sounds/goat_step.mp3', loop: true }).toDestination();
+const stepPlayer = new Tone.Player({ url: 'assets/sounds/goat_step.mp3', loop: true }).connect(ambientBus);
 stepPlayer.volume.value = EFFECT_VOLUME;
 
-const proximityOsc = new Tone.Oscillator({ type: 'sine', frequency: 220 }).toDestination();
-proximityOsc.volume.value = -100;  
+const proximityOsc = new Tone.Oscillator({ type: 'sine', frequency: 220 }).connect(ambientBus);
+proximityOsc.volume.value = -100;
 
-const keyboardSynth = new Tone.PolySynth(Tone.Synth).toDestination();
+const keyboardSynth = new Tone.PolySynth(Tone.Synth).connect(interactiveBus);
 keyboardSynth.volume.value = -6;
 
 const drumLow = new Tone.MembraneSynth({
   pitchDecay: 0.05,
   octaves: 6,
   envelope: { attack: 0.001, decay: 0.35, sustain: 0, release: 0.4 },
-}).toDestination();
+}).connect(interactiveBus);
 drumLow.volume.value = -4;
 
 const drumHigh = new Tone.MetalSynth({
@@ -49,43 +52,43 @@ const drumHigh = new Tone.MetalSynth({
   modulationIndex: 32,
   resonance: 4000,
   octaves: 1.5,
-}).toDestination();
+}).connect(interactiveBus);
 drumHigh.volume.value = -16;
 
 const cymbalShimmer = new Tone.NoiseSynth({
   noise: { type: 'white' },
   envelope: { attack: 0.001, decay: 0.25, sustain: 0 },
-}).toDestination();
+}).connect(interactiveBus);
 cymbalShimmer.volume.value = -26;
 
 const beatClopSynth = new Tone.MembraneSynth({
   pitchDecay: 0.02,
   octaves: 4,
   envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.1 },
-}).toDestination();
+}).connect(interactiveBus);
 beatClopSynth.volume.value = -10;
 
 const herdSynths = {
   whole: new Tone.Synth({
     oscillator: { type: 'sine' },
     envelope: { attack: 0.005, decay: 0.4, sustain: 0.5, release: 0.8 },
-  }).toDestination(),
+  }).connect(interactiveBus),
   half: new Tone.Synth({
     oscillator: { type: 'sawtooth' },
     envelope: { attack: 0.01, decay: 0.25, sustain: 0.2, release: 0.3 },
-  }).toDestination(),
+  }).connect(interactiveBus),
   quarter: new Tone.Synth({
     oscillator: { type: 'square' },
     envelope: { attack: 0.005, decay: 0.15, sustain: 0.05, release: 0.15 },
-  }).toDestination(),
+  }).connect(interactiveBus),
   eighth: new Tone.Synth({
     oscillator: { type: 'triangle' },
     envelope: { attack: 0.002, decay: 0.1, sustain: 0, release: 0.08 },
-  }).toDestination(),
+  }).connect(interactiveBus),
   six: new Tone.Synth({
     oscillator: { type: 'sine' },
     envelope: { attack: 0.001, decay: 0.06, sustain: 0, release: 0.05 },
-  }).toDestination(),
+  }).connect(interactiveBus),
 };
 herdSynths.whole.volume.value = 6;
 herdSynths.half.volume.value = -10;
@@ -226,25 +229,43 @@ export async function initAudio() {
   setInterval(playBaa, BAA_INTERVAL_MS);
 }
 
-export function setVolume(linearVolume) {
-  Tone.getDestination().mute = linearVolume <= 0;
+function setBusVolume(bus, linearVolume) {
+  bus.mute = linearVolume <= 0;
   if (linearVolume > 0) {
-    Tone.getDestination().volume.value = Tone.gainToDb(linearVolume);
+    bus.volume.value = Tone.gainToDb(linearVolume);
   }
+}
+
+// Background/map slider - the looping music and map atmosphere.
+export function setAmbientVolume(linearVolume) {
+  setBusVolume(ambientBus, linearVolume);
+}
+
+// Popup slider - drums, keyboard, and every toy/instrument sound.
+export function setInteractiveVolume(linearVolume) {
+  setBusVolume(interactiveBus, linearVolume);
 }
 
 export function duckBacktrack() {
   backtrack.volume.rampTo(BACKTRACK_DUCKED_VOLUME, 0.3);
 }
 
-export function getBeatPhase() {
+function getBeatElapsed() {
   const spb = 60 / beatBpm;
-  const elapsed = beatContextTime() - lastBeatTime;
+  let elapsed = beatContextTime() - lastBeatTime;
+  if (elapsed < 0) elapsed += spb;
+  return { elapsed, spb };
+}
+
+export function getBeatPhase() {
+  const { elapsed, spb } = getBeatElapsed();
   return Math.min(1, Math.max(0, elapsed / spb));
 }
 
 export function getBarPhase() {
-  const beatWithinBar = beatIndex % BEATS_PER_BAR;
+  const isAhead = beatContextTime() - lastBeatTime < 0;
+  const effectiveIndex = isAhead ? beatIndex - 1 : beatIndex;
+  const beatWithinBar = ((effectiveIndex % BEATS_PER_BAR) + BEATS_PER_BAR) % BEATS_PER_BAR;
   return (beatWithinBar + getBeatPhase()) / BEATS_PER_BAR;
 }
 
@@ -261,7 +282,7 @@ export function setBeatAudible(audible) {
 }
 
 export function isBacktrackAudible() {
-  return audioReady && !Tone.getDestination().mute && backtrack.volume.value > -50;
+  return audioReady && !ambientBus.mute && backtrack.volume.value > -50;
 }
 
 export function restoreBacktrack() {
@@ -323,11 +344,6 @@ export function updateProximityTone(proximityRatio) {
   proximityOsc.volume.value = -50 + eased * 42; // near-silent at the edge, up to -8dB at the node
 }
 
-// Tone.js throws if the same voice is retriggered at a non-increasing
-// timestamp (two calls landing in the same instant). Callers should avoid
-// that (e.g. map markers only let the single nearest node trigger sound),
-// but this is a last-resort guard so a scheduling collision never crashes
-// the caller (a synchronous canvas draw loop) instead of just dropping a note.
 function safeTrigger(fn) {
   try {
     fn();

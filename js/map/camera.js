@@ -1,4 +1,4 @@
-export let ZOOM = 1.2; 
+export let ZOOM = 0.6; // fully zoomed out by default
 const HOLD_RADIUS = 220;
 const FOLLOW_RADIUS = 380;
 const CAMERA_LAG = 4;
