@@ -1,5 +1,5 @@
 import { CONCEPTS } from '../data/concepts.js';
-import { isVisited, isQuizPassed } from '../core/progress.js';
+import { isVisited } from '../core/progress.js';
 import { PANEL_SIZE, getPanelList, getConceptPosition } from '../core/config.js';
 import { goat } from './goat.js';
 import { PROXIMITY_RADIUS, findNearestNodeInRange } from './nodes.js';
@@ -309,21 +309,32 @@ function drawSign(ctx, cameraX, cameraY, viewWidth, viewHeight, section) {
   ctx.restore();
 }
 
-// Nodes 
-function drawBadge(ctx, x, y, symbol, color) {
+// Nodes
+function drawDoneBadge(ctx, x, y) {
   ctx.beginPath();
-  ctx.arc(x, y, 14, 0, Math.PI * 2);
-  ctx.fillStyle = color;
+  ctx.arc(x, y, 15, 0, Math.PI * 2);
+  ctx.fillStyle = '#6b4a2f';
   ctx.fill();
-  ctx.strokeStyle = '#2a1f18';
+
+  ctx.beginPath();
+  ctx.arc(x, y, 12, 0, Math.PI * 2);
+  ctx.fillStyle = '#f4c95d';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x, y, 8, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+
+  ctx.strokeStyle = '#000000';
   ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x - 4, y);
+  ctx.lineTo(x - 1.5, y + 3);
+  ctx.lineTo(x + 4.5, y - 3.5);
   ctx.stroke();
-  ctx.fillStyle = '#fdf6e3';
-  ctx.font = 'bold 16px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(symbol, x, y);
-  ctx.textBaseline = 'alphabetic'; 
 }
 
 function drawSingleNode(ctx, concept, cameraX, cameraY, viewWidth, viewHeight) {
@@ -362,10 +373,8 @@ function drawGenericNode(ctx, concept, screenX, screenY) {
   ctx.font = 'bold 18px sans-serif';
   ctx.textAlign = 'center';
 
-  if (isQuizPassed(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
-  } else if (isVisited(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
+  if (isVisited(concept.id)) {
+    drawDoneBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 15);
   }
 
   ctx.fillText(concept.title, screenX, screenY + 40);
@@ -424,10 +433,8 @@ function drawNode1(ctx, concept, worldX, worldY, screenX, screenY) {
     );
   }
 
-  if (isQuizPassed(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
-  } else if (isDone) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
+  if (isDone) {
+    drawDoneBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 15);
   }
 
   ctx.fillStyle = '#412402';
@@ -485,10 +492,8 @@ function drawNode2(ctx, concept, worldX, worldY, screenX, screenY) {
     );
   }
 
-  if (isQuizPassed(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
-  } else if (isDone) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
+  if (isDone) {
+    drawDoneBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 15);
   }
 
   ctx.fillStyle = '#412402';
@@ -546,10 +551,8 @@ function drawNode3(ctx, concept, worldX, worldY, screenX, screenY) {
     );
   }
 
-  if (isQuizPassed(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
-  } else if (isDone) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
+  if (isDone) {
+    drawDoneBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 15);
   }
 
   ctx.fillStyle = '#412402';
@@ -611,10 +614,8 @@ function drawNode4(ctx, concept, worldX, worldY, screenX, screenY) {
     );
   }
 
-  if (isQuizPassed(concept.id)) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '★', '#f4c95d');
-  } else if (isDone) {
-    drawBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 5, '✓', '#5a8a3f');
+  if (isDone) {
+    drawDoneBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 15);
   }
 
   ctx.fillStyle = '#412402';
