@@ -10,6 +10,7 @@ import { renderStaircaseToy } from './toys/staircaseToy.js';
 import { renderWheelToy } from './toys/wheelToy.js';
 import { renderStackingToy } from './toys/stackingToy.js';
 import { renderComposerToy } from './toys/composerToy.js';
+import { renderNoteWheelToy, stopNoteWheelToy } from './toys/noteWheelToy.js';
 import { renderQuiz } from './quiz.js';
 import { renderBeatArcToy, stopBeatArcToy } from './toys/beatArcToy.js';
 import { renderRhythmStackToy, stopRhythmStackToy } from './toys/rhythmStackToy.js';
@@ -94,6 +95,8 @@ function renderToy(concept) {
     renderMountainToy(toyContainer, config);
   } else if (type === 'voice-toy') {
     renderVoiceToy(toyContainer, config);
+  } else if (type === 'note-wheel-toy') {
+    renderNoteWheelToy(toyContainer, config);
   } else {
     toyContainer.innerHTML = 'No toy for this concept yet.';
   }
@@ -145,6 +148,7 @@ export function closePopup() {
   stopRhythmStackToy();
   stopMountainToy();
   stopVoiceToy();
+  stopNoteWheelToy();
 }
 
 closeButton.addEventListener('click', closePopup);

@@ -21,7 +21,7 @@ export const CONCEPTS = [
 
   { id: 'twelve-notes',      section: 'melody',      order: 1,  title: 'The 12 Note Names',
     definition: 'Music uses just 12 different note names, like C, C#, and D, that repeat over and over, higher and lower.',
-    toy: { type: 'keyboard-highlight-toy', config: { notes: ['C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4'], label: 'Press play to hear all 12 notes in a row!' } },
+    toy: { type: 'note-wheel-toy', config: {} },
     instrument: { type: 'keyboard', startOctave: 4, octaveCount: 1 },
     quiz: { type: 'multiple-choice-text', config: { question: 'Which note comes right after C going up?', options: ['C#', 'D', 'B', 'G'], correctIndex: 0 } } },
   { id: 'octaves',           section: 'melody',      order: 2,  title: 'Octaves',
