@@ -41,7 +41,7 @@ export const CONCEPTS = [
     quiz: { type: 'ear-training', config: { question: 'Did that scale sound happy/bright or sad/serious?', playNotes: ['C4','D4','E4','F4','G4','A4','B4','C5'], options: ['Happy/Bright', 'Sad/Serious'], correctIndex: 0 } } },
   { id: 'minor-scale',       section: 'melody',      order: 5,  title: 'The Minor Scale',
     definition: 'The minor scale uses a different step pattern than major, and often sounds more serious or a little sad.',
-    toy: { type: 'staircase-toy', config: { notes: ['C4','D4','D#4','F4','G4','G#4','A#4','C5'], label: 'Climb the minor scale. Notice it feels different!' } },
+    toy: { type: 'minor-scale-toy', config: {} },
     quiz: { type: 'ear-training', config: { question: 'Did that scale sound happy/bright or sad/serious?', playNotes: ['C4','D4','D#4','F4','G4','G#4','A#4','C5'], options: ['Happy/Bright', 'Sad/Serious'], correctIndex: 1 } } },
   { id: 'sharps-flats',      section: 'melody',      order: 6,  title: 'Sharps and Flats',
     definition: 'A sharp raises a note up one half step; a flat lowers a note down one half step.',

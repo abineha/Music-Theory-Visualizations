@@ -262,7 +262,8 @@ export function renderMajorScaleToy(container, config = {}) {
       lastWalkFrameTime = now;
     }
     const f = frameFor(pitches()), pts = xyList(f), R = stoneR(f);
-    gSully.innerHTML = sullySVG(pts[0].x, pts[0].y - R * 1.2 - 3, Math.max(.3, Math.min(.46, R / 34)), walkFrame);
+    const idx = i + 1, lastIdx = pts.length - 1, sr = (idx === 0 || idx === lastIdx) ? R * 1.2 : R;
+    gSully.innerHTML = sullySVG(pts[idx].x, pts[idx].y - sr * 1.2 - 3, Math.max(.3, Math.min(.46, R / 34)), walkFrame);
 
     const arc = gTrail.querySelector(`.hop[data-i="${i}"]`);
     const st = gStones.querySelector(`.stone[data-i="${i + 1}"]`);
@@ -292,7 +293,7 @@ export function renderMajorScaleToy(container, config = {}) {
     const ps = pitches(), t0 = ctx.currentTime + .05 + at;
     ps.forEach((p, i) => {
       note(p, t0 + i * gap, i === ps.length - 1 ? 2.2 : 1.2);
-      if (i < steps.length) hlQ.push({ t: t0 + i * gap, i });
+      if (i < steps.length) hlQ.push({ t: t0 + (i + 1) * gap, i });
     });
     hlQ.push({ t: t0 + ps.length * gap, i: null });
     return ps.length * gap + .5;

@@ -2264,6 +2264,228 @@ html, body {
   }
 }
 
+@property --ms-ga {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #90C884;
+}
+
+@property --ms-gb {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #85C278;
+}
+
+@property --ms-paper {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #F7F1DF;
+}
+
+#msApp {
+  --ms-ink: #2B241D;
+  --ms-wool: #F7F4ED;
+  --ms-amber: #EFC03F;
+  --rose: #D8524B;
+  --green: #3E7A34;
+  --cream: #FFF3C4;
+  --violet: #7C6BAF;
+
+  background: var(--ms-gb);
+  background-image:
+    linear-gradient(45deg, var(--ms-ga) 25%, transparent 25%, transparent 75%, var(--ms-ga) 75%),
+    linear-gradient(45deg, var(--ms-ga) 25%, transparent 25%, transparent 75%, var(--ms-ga) 75%);
+  background-size: 64px 64px;
+  background-position: 0 0, 32px 32px;
+  transition: --ms-ga 1s ease, --ms-gb 1s ease, --ms-paper 1s ease;
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+  color: var(--ms-ink);
+  border: 5px solid var(--ms-ink);
+  border-radius: 22px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, .18);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(200px, 22%, 272px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "head side" "stage side" "bar side";
+  min-height: 460px;
+  margin-top: 30px;
+}
+
+#msApp * {
+  box-sizing: border-box;
+}
+
+#msApp #head {
+  grid-area: head;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 3px 16px 0;
+}
+
+#msApp #head h1 {
+  font-size: clamp(13px, 1.9vh, 18px);
+}
+
+#msApp #head p {
+  font-size: clamp(9px, 1.2vh, 11px);
+  opacity: .7;
+}
+
+#msApp #stage {
+  grid-area: stage;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+}
+
+#msApp #stage svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(380px, 42vh);
+  margin: 0 auto;
+}
+
+#msApp .handle {
+  cursor: pointer;
+}
+
+#msApp .handle:hover circle {
+  filter: brightness(1.12);
+}
+
+#msApp #bar {
+  grid-area: bar;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  padding: 2px 10px clamp(6px, 1.3vh, 12px);
+}
+
+#msApp button.big {
+  font: inherit;
+  font-weight: bold;
+  font-size: clamp(11px, 1.55vh, 14px);
+  padding: clamp(6px, 1.05vh, 10px) clamp(11px, 1.6vw, 17px);
+  border: 3px solid var(--ms-ink);
+  border-radius: 999px;
+  background: var(--ms-wool);
+  color: var(--ms-ink);
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--ms-ink);
+  position: relative;
+  overflow: hidden;
+}
+
+#msApp button.big:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ms-ink);
+}
+
+#msApp button.big:disabled {
+  opacity: .35;
+  cursor: default;
+}
+
+#msApp #bCompare {
+  background: var(--ms-amber);
+}
+
+#msApp #bRotate {
+  background: #D9D0EC;
+}
+
+#msApp button.loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(43, 36, 29, .22);
+  transform-origin: left center;
+  transform: scaleX(var(--prog, 0));
+}
+
+#msApp #side {
+  grid-area: side;
+  border-left: 4px dashed rgba(43, 36, 29, .2);
+  padding: clamp(7px, 1.4vh, 13px) 12px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(5px, 1.1vh, 11px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+#msApp .box {
+  background: color-mix(in srgb, var(--ms-paper) 55%, #fff);
+  border: 4px solid var(--ms-ink);
+  border-radius: 15px;
+  padding: clamp(6px, 1.1vh, 11px) 9px;
+  box-shadow: 0 4px 0 rgba(43, 36, 29, .22);
+}
+
+#msApp .lbl {
+  font-size: clamp(9px, 1.35vh, 11px);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  opacity: .55;
+  margin-bottom: 4px;
+}
+
+#msApp #mood {
+  font-size: clamp(15px, 2.5vh, 21px);
+  font-weight: bold;
+}
+
+#msApp #pattern {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: clamp(12px, 1.9vh, 15px);
+  font-weight: bold;
+  letter-spacing: .08em;
+  line-height: 1.5;
+}
+
+#msApp #notes {
+  font-size: clamp(10.5px, 1.6vh, 13px);
+  font-family: ui-monospace, Menlo, monospace;
+  line-height: 1.55;
+  word-break: break-all;
+}
+
+#msApp #msg {
+  background: var(--cream);
+  border: 3px solid var(--ms-ink);
+  border-radius: 13px;
+  padding: 8px;
+  font-size: clamp(10.5px, 1.6vh, 13px);
+  text-align: center;
+  line-height: 1.45;
+}
+
+@media (max-width: 880px) {
+  #msApp {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "head" "stage" "side" "bar";
+  }
+  #msApp #side {
+    border-left: none;
+    border-top: 4px dashed rgba(43, 36, 29, .2);
+    flex-direction: row;
+    align-items: center;
+    gap: 9px;
+    padding: 6px 10px;
+  }
+  #msApp .box,
+  #msApp #msg {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
 .note-toy {
   display: flex;
   flex-direction: column;
