@@ -4,7 +4,7 @@ const mod = (a, n) => ((a % n) + n) % n, nameOf = (n) => NAMES[mod(n, 12)];
 const freq = (n) => 440 * Math.pow(2, (n - 69) / 12);
 const NATURAL = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1];
 
-const UX = 52, UY = 34, PADX = 132, PADR = 54, PADTOP = 58, PADBOT = 116, W = 1000, H = 520, KMAX = 1.30;
+const UX = 52, UY = 34, PADX = 132, PADR = 54, PADTOP = 120, PADBOT = 116, W = 1000, H = 760, KMAX = 1.30;
 const AXIS_X = 86;
 
 function layout(st, sts) {
@@ -63,7 +63,7 @@ export function renderHopTrailToy(container, config = {}) {
   </div>
 
   <div id="stage">
-    <svg id="board" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet">
+      <svg id="board" viewBox="0 0 1000 760" preserveAspectRatio="xMidYMid meet">
       <defs>
         <radialGradient id="gLight" cx="34%" cy="28%" r="72%">
           <stop offset="0" stop-color="#D6D1C4"/><stop offset="55%" stop-color="#ABA598"/>
@@ -75,7 +75,7 @@ export function renderHopTrailToy(container, config = {}) {
         </radialGradient>
       </defs>
       <g id="gAxis"></g><g id="gGhost"></g><g id="gTrail"></g><g id="gHL"></g><g id="gStones"></g>
-      <g id="gCode"></g><g id="gSully"></g><g id="gTip"></g>
+      <g id="gCode"></g><g id="gSully"></g><g id="gTip"></g><g id="gLabels"></g>
     </svg>
   </div>
 
@@ -96,12 +96,43 @@ export function renderHopTrailToy(container, config = {}) {
     </div>
     <div class="box"><div class="lbl"><span>notes you landed on</span></div><div id="notes">C</div></div>
     <div id="echo">Hop about. Then press <b>Start at a different stone!</b></div>
+    <div class="box">
+      <div class="lbl"><span>before &middot; now &middot; next</span></div>
+      <div id="noteStatus" class="note-status">
+        <span class="ns-prev">&nbsp;</span>
+        <span class="ns-cur">&nbsp;</span>
+        <span class="ns-next">&nbsp;</span>
+      </div>
+    </div>
   </div>
 </div>`;
 
   const $ = (i) => document.getElementById(i);
   const gAxis = $('gAxis'), gGhost = $('gGhost'), gTrail = $('gTrail'), gHL = $('gHL'),
-        gStones = $('gStones'), gCode = $('gCode'), gSully = $('gSully'), gTip = $('gTip');
+        gStones = $('gStones'), gCode = $('gCode'), gSully = $('gSully'), gTip = $('gTip'), gLabels = $('gLabels');
+  const noteStatus = $('noteStatus');
+
+  function pitchesFor(st, sts) {
+    const o = [st]; let p = st;
+    for (const s of sts) { p += s.size * s.dir; o.push(p); }
+    return o;
+  }
+
+  function updateNoteStatus(seq, idx) {
+    const label = (i) => (i >= 0 && i < seq.length ? nameOf(seq[i]) : '—');
+    noteStatus.innerHTML = `
+      <span class="ns-prev">${label(idx - 1)}</span>
+      <span class="ns-cur">${label(idx)}</span>
+      <span class="ns-next">${label(idx + 1)}</span>`;
+  }
+
+  function labelSVG(q, pVal, r, opacity) {
+    const nm = nameOf(pVal);
+    const fs = r * (nm.length > 1 ? 0.84 : 1.02);
+    return `<text x="${q.x.toFixed(1)}" y="${(q.y + fs * 0.35).toFixed(1)}" text-anchor="middle" font-family="Trebuchet MS,sans-serif"
+      font-weight="bold" font-size="${fs.toFixed(1)}" fill="#2B241D" stroke="#F7F1DF" stroke-width="3"
+      paint-order="stroke fill" opacity="${opacity}">${nm}</text>`;
+  }
 
   function sullySVG(x, y, face, k, frame) {
     const size = 190;
@@ -150,12 +181,14 @@ export function renderHopTrailToy(container, config = {}) {
     const f = frameFor(all), R = stoneR(f);
     gAxis.innerHTML = drawAxis(f);
 
+    let ghostPts = null, ghostLayout = null;
     if (ghost) {
-      const gp = layout(ghost.start, ghost.steps).map((q) => toXY(q, f));
+      ghostLayout = layout(ghost.start, ghost.steps);
+      ghostPts = ghostLayout.map((q) => toXY(q, f));
       gGhost.innerHTML = ghost.steps.map((st, i) =>
-        `<path class="ghop" data-i="${i}" d="${hopPath(gp[i], gp[i + 1], st.size, f)}" fill="none"
+        `<path class="ghop" data-i="${i}" d="${hopPath(ghostPts[i], ghostPts[i + 1], st.size, f)}" fill="none"
            stroke="#2B241D" stroke-width="4.5" stroke-linecap="round" opacity=".2" stroke-dasharray="2 11"/>`).join('') + `
-        ${gp.map((q) => `<circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="${(R * .8).toFixed(1)}" fill="#B7AE9F" opacity=".35"/>`).join('')}`;
+        ${ghostPts.map((q) => `<circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="${(R * .8).toFixed(1)}" fill="#B7AE9F" opacity=".35"/>`).join('')}`;
     } else gGhost.innerHTML = '';
 
     const pts = mine.map((q) => toXY(q, f));
@@ -165,15 +198,17 @@ export function renderHopTrailToy(container, config = {}) {
 
     gStones.innerHTML = pts.map((q, i) => {
       const last = i === pts.length - 1, r = last ? R * 1.25 : R;
-      const nm = nameOf(mine[i].p), fs = (r * (nm.length > 1 ? 0.84 : 1.02));
       return `<ellipse cx="${(q.x + 1.5).toFixed(1)}" cy="${(q.y + r * .42).toFixed(1)}" rx="${(r * .92).toFixed(1)}" ry="${(r * .32).toFixed(1)}" fill="rgba(43,36,29,.2)"/>
         <circle class="stone" data-i="${i}" cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="${r.toFixed(1)}"
           fill="${last ? 'url(#gOn)' : 'url(#gLight)'}" stroke="#2B241D" stroke-width="${last ? 4 : 3}"/>
         <ellipse cx="${(q.x - r * .30).toFixed(1)}" cy="${(q.y - r * .46).toFixed(1)}" rx="${(r * .40).toFixed(1)}" ry="${(r * .22).toFixed(1)}"
-          fill="#fff" opacity=".30" transform="rotate(-24 ${q.x.toFixed(1)} ${q.y.toFixed(1)})"/>
-        <text x="${q.x.toFixed(1)}" y="${(q.y + fs * 0.35).toFixed(1)}" text-anchor="middle" font-family="Trebuchet MS,sans-serif"
-          font-weight="bold" font-size="${fs.toFixed(1)}" fill="#2B241D">${nm}</text>`;
+          fill="#fff" opacity=".30" transform="rotate(-24 ${q.x.toFixed(1)} ${q.y.toFixed(1)})"/>`;
     }).join('');
+
+
+    gLabels.innerHTML =
+      (ghostPts ? ghostPts.map((q, i) => labelSVG(q, ghostLayout[i].p, R, .6)).join('') : '')
+      + pts.map((q, i) => labelSVG(q, mine[i].p, R, 1)).join('');
 
     const sy = H - 86;
     gCode.innerHTML = steps.map((s, i) => morseMark((pts[i].x + pts[i + 1].x) / 2, sy, s, f)).join('')
@@ -190,6 +225,7 @@ export function renderHopTrailToy(container, config = {}) {
       + steps.map((s) => `<span style="font-size:.66em;color:${s.size === 1 ? 'var(--rose)' : 'var(--green)'}">${s.size === 1 ? 'H' : 'W'}</span>`).join(' ')
       || '&nbsp;';
     $('notes').textContent = pitches().map(nameOf).join(' ');
+    if (!busy) updateNoteStatus(pitches(), pitches().length - 1);
     $('count').textContent = `${steps.length} / ${LIMIT}`;
     const full = steps.length >= LIMIT;
     $('bSmall').disabled = full; $('bBig').disabled = full;
@@ -216,7 +252,12 @@ export function renderHopTrailToy(container, config = {}) {
 
   function queueHL(t, which, i) { hlQueue.push({ t, which, i }); }
   function showHL(which, i) {
-    if (which === null) { gHL.innerHTML = ''; return; }
+    if (which === null) {
+      gHL.innerHTML = '';
+      updateNoteStatus(pitches(), pitches().length - 1);
+      return;
+    }
+    updateNoteStatus(which === 'ghost' ? pitchesFor(ghost.start, ghost.steps) : pitches(), i + 1);
     const host = which === 'ghost' ? gGhost : gTrail;
     const arc = host.querySelector(`.${which === 'ghost' ? 'ghop' : 'hop'}[data-i="${i}"]`);
     let out = '';
@@ -351,7 +392,7 @@ export function renderHopTrailToy(container, config = {}) {
     const total = d * 2 + .55 + .4;
     runProgress($('bAgain'), total);
     timers.push(setTimeout(() => { busy = false; render(); }, total * 1000));
-    $('echo').innerHTML = `Same hops, started <b>${Math.abs(shift)} stone${Math.abs(shift) === 1 ? '' : 's'} ${shift > 0 ? 'higher' : 'lower'}</b> &mdash; same tune.`;
+    $('echo').innerHTML = `Same hops, started <b>${Math.abs(shift)} stone${Math.abs(shift) === 1 ? '' : 's'} ${shift > 0 ? 'higher' : 'lower'}</b> = same tune.`;
   };
 
   keydownListener = (e) => {
