@@ -1,6 +1,7 @@
+import { CONCEPTS } from '../data/concepts.js';
 
 export const PANEL_SIZE = 900;
-export const NODES_PER_PANEL = 2;  
+export const NODES_PER_PANEL = 2;
 
 export const SECTION_DIRECTION = {
   foundations: 'left',
@@ -49,12 +50,23 @@ export function getSectionAt(x, y) {
   return null;
 }
 
+const SECTION_NODE_COUNTS = CONCEPTS.reduce((counts, concept) => {
+  counts[concept.section] = (counts[concept.section] || 0) + 1;
+  return counts;
+}, {});
+
 export function getNodePosition(section, order) {
   const direction = SECTION_DIRECTION[section];
   const nodeIndexInSection = order - 1;
   const panelIndex = Math.floor(nodeIndexInSection / NODES_PER_PANEL);
   const padIndex = nodeIndexInSection % NODES_PER_PANEL;
   const centre = getPanelCentre(direction, panelIndex);
+
+  const nodesInPanel = Math.min(NODES_PER_PANEL, (SECTION_NODE_COUNTS[section] || 0) - panelIndex * NODES_PER_PANEL);
+  if (nodesInPanel === 1) {
+    return centre;
+  }
+
   const offset = PAD_OFFSETS[direction][padIndex];
   return { x: centre.x + offset.x, y: centre.y + offset.y };
 }

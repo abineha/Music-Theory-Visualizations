@@ -4,9 +4,7 @@ import { renderNotation } from './notation.js';
 import { renderKeyboard } from './instruments/keyboard.js';
 import { renderDrumPad } from './instruments/drumPad.js';
 import { renderSliderToy } from './toys/sliderToy.js';
-import { renderTapToy } from './toys/tapToy.js';
 import { renderKeyboardHighlightToy } from './toys/keyboardHighlightToy.js';
-import { renderStaircaseToy } from './toys/staircaseToy.js';
 import { renderWheelToy } from './toys/wheelToy.js';
 import { renderStackingToy } from './toys/stackingToy.js';
 import { renderComposerToy } from './toys/composerToy.js';
@@ -78,12 +76,8 @@ function renderToy(concept) {
   const { type, config } = concept.toy;
   if (type === 'slider-toy') {
     renderSliderToy(toyContainer, config);
-  } else if (type === 'tap-toy') {
-    renderTapToy(toyContainer, config);
   } else if (type === 'keyboard-highlight-toy') {
     renderKeyboardHighlightToy(toyContainer, config);
-    } else if (type === 'staircase-toy') {
-    renderStaircaseToy(toyContainer, config);
   } else if (type === 'wheel-toy') {
     renderWheelToy(toyContainer, config);
   } else if (type === 'stacking-toy') {
