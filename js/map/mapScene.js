@@ -16,6 +16,8 @@ function loadImage(src) {
 
 const nodeMarkerImage = loadImage('assets/images/node-marker.svg');
 
+const GLOBAL_ORDER = new Map(CONCEPTS.map((concept, i) => [concept.id, i + 1]));
+
 const NODE1_CONCEPT_ID = 'beat-tempo';
 const NODE1_FRAMES = {
   undone: [
@@ -369,7 +371,7 @@ function drawGenericNode(ctx, concept, screenX, screenY) {
     NODE_MARKER_SIZE
   );
 
-  ctx.fillStyle = '#2a1f18';
+  ctx.fillStyle = '#000000';
   ctx.font = 'bold 18px sans-serif';
   ctx.textAlign = 'center';
 
@@ -377,7 +379,7 @@ function drawGenericNode(ctx, concept, screenX, screenY) {
     drawDoneBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 15);
   }
 
-  ctx.fillText(concept.title, screenX, screenY + 40);
+  ctx.fillText(`${GLOBAL_ORDER.get(concept.id)}: ${concept.title}`, screenX, screenY + 40);
 }
 
 function drawNode1(ctx, concept, worldX, worldY, screenX, screenY) {
@@ -437,10 +439,10 @@ function drawNode1(ctx, concept, worldX, worldY, screenX, screenY) {
     drawDoneBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 15);
   }
 
-  ctx.fillStyle = '#412402';
+  ctx.fillStyle = '#000000';
   ctx.font = 'bold 18px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(`${concept.order}: ${concept.title}`, screenX, screenY + 40);
+  ctx.fillText(`${GLOBAL_ORDER.get(concept.id)}: ${concept.title}`, screenX, screenY + 40);
 }
 
 function drawNode2(ctx, concept, worldX, worldY, screenX, screenY) {
@@ -496,10 +498,10 @@ function drawNode2(ctx, concept, worldX, worldY, screenX, screenY) {
     drawDoneBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 15);
   }
 
-  ctx.fillStyle = '#412402';
+  ctx.fillStyle = '#000000';
   ctx.font = 'bold 18px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(`${concept.order}: ${concept.title}`, screenX, screenY + 40);
+  ctx.fillText(`${GLOBAL_ORDER.get(concept.id)}: ${concept.title}`, screenX, screenY + 40);
 }
 
 function drawNode3(ctx, concept, worldX, worldY, screenX, screenY) {
@@ -555,10 +557,10 @@ function drawNode3(ctx, concept, worldX, worldY, screenX, screenY) {
     drawDoneBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 15);
   }
 
-  ctx.fillStyle = '#412402';
+  ctx.fillStyle = '#000000';
   ctx.font = 'bold 18px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(`${concept.order}: ${concept.title}`, screenX, screenY + 40);
+  ctx.fillText(`${GLOBAL_ORDER.get(concept.id)}: ${concept.title}`, screenX, screenY + 40);
 }
 
 function drawNode4(ctx, concept, worldX, worldY, screenX, screenY) {
@@ -618,10 +620,10 @@ function drawNode4(ctx, concept, worldX, worldY, screenX, screenY) {
     drawDoneBadge(ctx, screenX + 40, screenY - NODE_MARKER_SIZE - 15);
   }
 
-  ctx.fillStyle = '#412402';
+  ctx.fillStyle = '#000000';
   ctx.font = 'bold 18px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(`${concept.order}: ${concept.title}`, screenX, screenY + 40);
+  ctx.fillText(`${GLOBAL_ORDER.get(concept.id)}: ${concept.title}`, screenX, screenY + 40);
 }
 
 export const SCENE_ENTITIES = [
