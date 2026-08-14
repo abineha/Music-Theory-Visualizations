@@ -35,7 +35,7 @@ export const CONCEPTS = [
     quiz: { type: 'ear-training', config: { question: 'Was that a half step or a whole step?', playNotes: ['C4', 'C#4'], options: ['Half step', 'Whole step'], correctIndex: 0 } } },
   { id: 'major-scale',       section: 'melody',      order: 4,  title: 'The Major Scale',
     definition: 'The major scale is a set of 7 notes climbed in a pattern of whole and half steps that sounds bright and happy.',
-    toy: { type: 'staircase-toy', config: { notes: ['C4','D4','E4','F4','G4','A4','B4','C5'], label: 'Climb the major scale!' } },
+    toy: { type: 'major-scale-toy', config: {} },
     notation: { notes: 'C4/q, D4, E4, F4, G4, A4, B4, C5' },
     instrument: { type: 'keyboard', startOctave: 4, octaveCount: 1, highlight: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'] },
     quiz: { type: 'ear-training', config: { question: 'Did that scale sound happy/bright or sad/serious?', playNotes: ['C4','D4','E4','F4','G4','A4','B4','C5'], options: ['Happy/Bright', 'Sad/Serious'], correctIndex: 0 } } },

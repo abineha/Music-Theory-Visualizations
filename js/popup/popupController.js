@@ -12,6 +12,7 @@ import { renderStackingToy } from './toys/stackingToy.js';
 import { renderComposerToy } from './toys/composerToy.js';
 import { renderNoteWheelToy, stopNoteWheelToy } from './toys/noteWheelToy.js';
 import { renderHopTrailToy, stopHopTrailToy } from './toys/hopTrailToy.js';
+import { renderMajorScaleToy, stopMajorScaleToy } from './toys/majorScaleToy.js';
 import { renderQuiz } from './quiz.js';
 import { renderBeatArcToy, stopBeatArcToy } from './toys/beatArcToy.js';
 import { renderRhythmStackToy, stopRhythmStackToy } from './toys/rhythmStackToy.js';
@@ -100,6 +101,8 @@ function renderToy(concept) {
     renderNoteWheelToy(toyContainer, config);
   } else if (type === 'hop-trail-toy') {
     renderHopTrailToy(toyContainer, config);
+  } else if (type === 'major-scale-toy') {
+    renderMajorScaleToy(toyContainer, config);
   } else {
     toyContainer.innerHTML = 'No toy for this concept yet.';
   }
@@ -153,6 +156,7 @@ export function closePopup() {
   stopVoiceToy();
   stopNoteWheelToy();
   stopHopTrailToy();
+  stopMajorScaleToy();
 }
 
 closeButton.addEventListener('click', closePopup);
