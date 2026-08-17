@@ -7,6 +7,7 @@ import { renderSliderToy } from './toys/sliderToy.js';
 import { renderKeyboardHighlightToy } from './toys/keyboardHighlightToy.js';
 import { renderWheelToy } from './toys/wheelToy.js';
 import { renderStackingToy } from './toys/stackingToy.js';
+import { renderIntervalsToy, stopIntervalsToy } from './toys/intervalsToy.js';
 import { renderComposerToy } from './toys/composerToy.js';
 import { renderNoteWheelToy, stopNoteWheelToy } from './toys/noteWheelToy.js';
 import { renderHopTrailToy, stopHopTrailToy } from './toys/hopTrailToy.js';
@@ -100,6 +101,8 @@ function renderToy(concept) {
     renderMajorScaleToy(toyContainer, config);
   } else if (type === 'minor-scale-toy') {
     renderMinorScaleToy(toyContainer, config);
+  } else if (type === 'intervals-toy') {
+    renderIntervalsToy(toyContainer, config);
   } else {
     toyContainer.innerHTML = 'No toy for this concept yet.';
   }
@@ -155,6 +158,7 @@ export function closePopup() {
   stopHopTrailToy();
   stopMajorScaleToy();
   stopMinorScaleToy();
+  stopIntervalsToy();
 }
 
 closeButton.addEventListener('click', closePopup);

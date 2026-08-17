@@ -2230,6 +2230,94 @@ html, body {
   }
 }
 
+#sbApp {
+  --sb-ink: #2B241D;
+  --sb-parchment: #F7F1DF;
+  --sb-wool: #F7F4ED;
+  --sb-ga: #90C884;
+  --sb-gb: #85C278;
+  --sb-amber: #EFC03F;
+  --rose: #D8524B;
+  --green: #3E7A34;
+  --cream: #FFF3C4;
+
+  background: var(--sb-gb);
+  background-image:
+    linear-gradient(45deg, var(--sb-ga) 25%, transparent 25%, transparent 75%, var(--sb-ga) 75%),
+    linear-gradient(45deg, var(--sb-ga) 25%, transparent 25%, transparent 75%, var(--sb-ga) 75%);
+  background-size: 64px 64px;
+  background-position: 0 0, 32px 32px;
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+  color: var(--sb-ink);
+  border: 5px solid var(--sb-ink);
+  border-radius: 22px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, .18);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto;
+  min-height: 460px;
+  margin-top: 24px;
+}
+
+#sbApp * { box-sizing: border-box; }
+
+#sbApp #head { padding: 9px 18px 2px; text-align: center; }
+#sbApp #head h1 { font-size: clamp(15px, 2.4vh, 23px); }
+#sbApp #head p { font-size: clamp(11px, 1.6vh, 14px); opacity: .72; }
+
+#sbApp #stage { position: relative; min-height: 0; touch-action: none; }
+#sbApp #stage svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(260px, 30vh);
+  margin: 0 auto;
+}
+
+#sbApp #slide { padding: 2px clamp(18px, 5vw, 64px) 4px; }
+#sbApp #pos { -webkit-appearance: none; appearance: none; width: 100%; height: 26px; background: transparent; cursor: pointer; }
+#sbApp #pos::-webkit-slider-runnable-track { height: 14px; border-radius: 999px; background: #DCD2B9; border: 3px solid var(--sb-ink); }
+#sbApp #pos::-moz-range-track { height: 14px; border-radius: 999px; background: #DCD2B9; border: 3px solid var(--sb-ink); }
+#sbApp #pos::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -10px; border-radius: 50%; background: var(--sb-amber); border: 4px solid var(--sb-ink); box-shadow: 0 2px 0 rgba(43, 36, 29, .4); }
+#sbApp #pos::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: var(--sb-amber); border: 4px solid var(--sb-ink); }
+#sbApp #pos:disabled { opacity: .4; cursor: default; }
+
+#sbApp #roots { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 2px 12px 4px; flex-wrap: wrap; }
+#sbApp .rlbl { font-size: clamp(10px, 1.5vh, 13px); opacity: .6; text-transform: uppercase; letter-spacing: .06em; }
+#sbApp #rchips { display: flex; gap: 4px; }
+#sbApp .rc {
+  font: inherit; font-weight: bold; font-size: clamp(11px, 1.7vh, 14px);
+  min-width: clamp(30px, 3.4vw, 40px); padding: clamp(4px, .8vh, 7px) 4px; text-align: center;
+  border: 3px solid var(--sb-ink); border-radius: 10px; cursor: pointer;
+  box-shadow: 0 3px 0 var(--sb-ink); background: var(--sb-wool); color: var(--sb-ink);
+}
+#sbApp .rc.acc { background: #8C836F; color: #F7F1DF; }
+#sbApp .rc.sel { background: var(--sb-amber); }
+#sbApp .rc:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--sb-ink); }
+#sbApp .rc:disabled { opacity: .4; cursor: default; }
+
+#sbApp #status { text-align: center; padding: 2px 14px 4px; }
+#sbApp #big { font-size: clamp(17px, 3.2vh, 28px); font-weight: bold; line-height: 1.2; min-height: 1.25em; }
+#sbApp #lanterns { display: flex; gap: 9px; justify-content: center; margin-top: 5px; }
+#sbApp .lan { width: clamp(26px, 4vh, 36px); height: clamp(26px, 4vh, 36px); }
+
+#sbApp #bar { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; padding: 5px 12px clamp(8px, 1.5vh, 14px); }
+#sbApp button {
+  font: inherit; font-weight: bold; font-size: clamp(12px, 1.8vh, 16px);
+  padding: clamp(7px, 1.2vh, 11px) clamp(14px, 2vw, 24px); border: 4px solid var(--sb-ink);
+  border-radius: 999px; background: var(--sb-wool); color: var(--sb-ink); cursor: pointer;
+  box-shadow: 0 4px 0 var(--sb-ink); position: relative; overflow: hidden;
+}
+#sbApp button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--sb-ink); }
+#sbApp #bListen { background: var(--sb-amber); }
+#sbApp button.loading::after {
+  content: ''; position: absolute; inset: 0; background: rgba(43, 36, 29, .26);
+  transform-origin: left center; transform: scaleX(var(--prog, 0));
+}
+#sbApp button:disabled { opacity: .4; cursor: default; box-shadow: 0 4px 0 rgba(43, 36, 29, .4); }
+#sbApp button.on { background: #BFE6A8; }
+
 @property --ms-ga {
   syntax: '<color>';
   inherits: true;

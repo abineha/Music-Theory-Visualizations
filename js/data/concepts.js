@@ -42,7 +42,7 @@ export const CONCEPTS = [
 
   { id: 'intervals',         section: 'harmony',     order: 1,  title: 'Intervals',
     definition: 'An interval is the distance in pitch between two notes, played together or one after another.',
-    toy: { type: 'slider-toy', config: { mode: 'interval', baseNote: 'C4', maxSemitones: 12, label: 'Drag to hear the gap between notes grow' } },
+    toy: { type: 'intervals-toy', config: {} },
     quiz: { type: 'ear-training', config: { question: 'Was the gap between those two notes small or large?', playNotes: ['C4', 'G4'], options: ['Small (close together)', 'Large (far apart)'], correctIndex: 1 } } },
   { id: 'building-chords',   section: 'harmony',     order: 2,  title: 'Building Chords',
     definition: 'A chord is built by stacking notes on top of each other, usually in intervals of a third.',
