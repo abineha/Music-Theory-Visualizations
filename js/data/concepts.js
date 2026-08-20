@@ -53,10 +53,6 @@ export const CONCEPTS = [
     definition: "A chord progression is a sequence of chords played one after another to build a song's harmony.",
     toy: { type: 'chord-progressions-toy', config: {} },
     quiz: { type: 'listen-and-order', config: { label: 'Listen to the chord progression, then put the chords back in order!', sequence: [ { label: 'I (C)', notes: ['C4','E4','G4'] }, { label: 'IV (F)', notes: ['F4','A4','C5'] }, { label: 'V (G)', notes: ['G4','B4','D5'] } ] } } },
-  { id: 'seven-modes',       section: 'harmony',     order: 4,  title: 'The Seven Modes',
-    definition: 'Modes are seven different scales, each starting on a different note of the major scale, each with its own mood.',
-    toy: { type: 'wheel-toy', config: { label: 'Pick a mode to hear its scale!', options: [ { label: 'Ionian', notes: ['C4','D4','E4','F4','G4','A4','B4','C5'] }, { label: 'Dorian', notes: ['D4','E4','F4','G4','A4','B4','C5','D5'] }, { label: 'Phrygian', notes: ['E4','F4','G4','A4','B4','C5','D5','E5'] }, { label: 'Lydian', notes: ['F4','G4','A4','B4','C5','D5','E5','F5'] }, { label: 'Mixolydian', notes: ['G4','A4','B4','C5','D5','E5','F5','G5'] }, { label: 'Aeolian', notes: ['A4','B4','C5','D5','E5','F5','G5','A5'] }, { label: 'Locrian', notes: ['B4','C5','D5','E5','F5','G5','A5','B5'] } ] } },
-    quiz: { type: 'ear-training', config: { question: 'Did that scale sound like a normal major scale, or different/unusual?', playNotes: ['D4','E4','F4','G4','A4','B4','C5','D5'], options: ['Sounded like normal major', 'Sounded different/unique'], correctIndex: 1 } } },
 
   { id: 'make-your-song',    section: 'playground',  order: 1,  title: 'Make your song!',
     definition: 'Put together your own tune by picking notes in whatever order sounds good to you.',

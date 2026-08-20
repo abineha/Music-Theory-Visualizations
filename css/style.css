@@ -617,45 +617,6 @@ html, body {
   background: var(--button-active);
 }
 
-.toy-wheel-wrapper {
-  text-align: center;
-}
-
-.toy-wheel {
-  position: relative;
-  width: 260px;
-  height: 260px;
-  margin: 10px auto;
-  border-radius: 50%;
-  border: 2px dashed rgba(217, 185, 138, 0.7);
-}
-
-.toy-wheel-slot {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 2px solid var(--accent-border);
-  background: var(--button-bg);
-  color: var(--ink);
-  font-weight: bold;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-
-.toy-wheel-slot:active {
-  background: var(--accent);
-  color: var(--ink);
-}
-
-.toy-wheel-result {
-  margin-top: 12px;
-  font-size: 1rem;
-  color: var(--accent-strong);
-  min-height: 1.4em;
-}
-
 .toy-stack-wrapper {
   text-align: center;
 }

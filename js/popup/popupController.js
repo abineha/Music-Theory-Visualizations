@@ -5,7 +5,6 @@ import { renderKeyboard } from './instruments/keyboard.js';
 import { renderDrumPad } from './instruments/drumPad.js';
 import { renderSliderToy } from './toys/sliderToy.js';
 import { renderKeyboardHighlightToy } from './toys/keyboardHighlightToy.js';
-import { renderWheelToy } from './toys/wheelToy.js';
 import { renderStackingToy } from './toys/stackingToy.js';
 import { renderIntervalsToy, stopIntervalsToy } from './toys/intervalsToy.js';
 import { renderComposerToy } from './toys/composerToy.js';
@@ -81,8 +80,6 @@ function renderToy(concept) {
     renderSliderToy(toyContainer, config);
   } else if (type === 'keyboard-highlight-toy') {
     renderKeyboardHighlightToy(toyContainer, config);
-  } else if (type === 'wheel-toy') {
-    renderWheelToy(toyContainer, config);
   } else if (type === 'stacking-toy') {
     renderStackingToy(toyContainer, config);
   } else if (type === 'composer-toy') {
@@ -166,6 +163,7 @@ export function closePopup() {
   stopMinorScaleToy();
   stopIntervalsToy();
   stopBuildingChordsToy();
+  stopChordProgressionsToy();
 }
 
 closeButton.addEventListener('click', closePopup);
