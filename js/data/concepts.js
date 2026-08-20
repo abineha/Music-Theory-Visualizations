@@ -46,7 +46,7 @@ export const CONCEPTS = [
     quiz: { type: 'ear-training', config: { question: 'Was the gap between those two notes small or large?', playNotes: ['C4', 'G4'], options: ['Small (close together)', 'Large (far apart)'], correctIndex: 1 } } },
   { id: 'building-chords',   section: 'harmony',     order: 2,  title: 'Building Chords',
     definition: 'A chord is built by stacking notes on top of each other, usually in intervals of a third.',
-    toy: { type: 'stacking-toy', config: { label: 'Click each block to stack a C major chord!', playMode: 'together', blocks: [ { label: 'Root (C)', notes: ['C4'] }, { label: 'Third (E)', notes: ['E4'] }, { label: 'Fifth (G)', notes: ['G4'] } ] } },
+    toy: { type: 'building-chords-toy', config: {} },
     notation: { notes: '(C4 E4 G4)/q' },
     quiz: { type: 'ear-training', config: { question: 'How many different notes did you hear stacked together?', playNotes: ['C4', 'E4', 'G4'], options: ['1', '2', '3', '4'], correctIndex: 2 } } },
   { id: 'chord-progressions',section: 'harmony',     order: 3,  title: 'Chord Progressions',

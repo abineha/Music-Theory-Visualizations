@@ -2798,3 +2798,84 @@ html, body {
   background: #c9d3d9;
 }
 
+#ccApp {
+  --cc-ink: #2B241D;
+  --cc-wool: #F7F4ED;
+  --cc-amber: #EFC03F;
+
+  background: #85C278;
+  background-image:
+    linear-gradient(45deg, #90C884 25%, transparent 25%, transparent 75%, #90C884 75%),
+    linear-gradient(45deg, #90C884 25%, transparent 25%, transparent 75%, #90C884 75%);
+  background-size: 64px 64px;
+  background-position: 0 0, 32px 32px;
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+  color: var(--cc-ink);
+  border: 5px solid var(--cc-ink);
+  border-radius: 22px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, .18);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+  transition: background .8s ease;
+  min-height: 460px;
+  margin-top: 24px;
+}
+
+#ccApp * { box-sizing: border-box; }
+
+#ccApp #head { padding: 8px 18px 1px; text-align: center; }
+#ccApp #head h1 { font-size: clamp(15px, 2.3vh, 22px); }
+#ccApp #head p { font-size: clamp(10px, 1.5vh, 13px); opacity: .72; }
+
+#ccApp #stage { position: relative; min-height: 0; touch-action: none; }
+#ccApp #stage svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(280px, 32vh);
+  margin: 0 auto;
+}
+
+#ccApp #roots { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 3px 12px 2px; flex-wrap: wrap; }
+#ccApp .rlbl { font-size: clamp(9px, 1.4vh, 12px); opacity: .6; text-transform: uppercase; letter-spacing: .06em; }
+#ccApp #rchips { display: flex; gap: 4px; }
+#ccApp .rc {
+  font: inherit; font-weight: bold; font-size: clamp(10.5px, 1.6vh, 13.5px);
+  min-width: clamp(28px, 3.2vw, 38px); padding: clamp(4px, .75vh, 7px) 3px; text-align: center;
+  border: 3px solid var(--cc-ink); border-radius: 10px; cursor: pointer;
+  box-shadow: 0 3px 0 var(--cc-ink); background: var(--cc-wool); color: var(--cc-ink);
+}
+#ccApp .rc.acc { background: #8C836F; color: #F7F1DF; }
+#ccApp .rc.sel { background: var(--cc-amber); }
+#ccApp .rc:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--cc-ink); }
+#ccApp .rc:disabled { opacity: .4; cursor: default; }
+
+#ccApp #status { text-align: center; padding: 2px 14px 3px; }
+#ccApp #big { font-size: clamp(16px, 3vh, 26px); font-weight: bold; line-height: 1.2; min-height: 1.25em; }
+#ccApp #sub { font-size: clamp(10px, 1.5vh, 13px); opacity: .75; min-height: 1.2em; }
+#ccApp #skies { display: flex; gap: 8px; justify-content: center; margin-top: 4px; align-items: center; }
+#ccApp .sk { width: clamp(26px, 3.9vh, 38px); height: clamp(26px, 3.9vh, 38px); background: none; border: none; padding: 0; cursor: pointer; display: block; }
+#ccApp .sk:active { transform: translateY(2px); }
+#ccApp .sk:disabled { cursor: default; opacity: .5; }
+#ccApp .skwrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+#ccApp .skwrap span { font-size: clamp(8px, 1.15vh, 10px); opacity: .6; }
+
+#ccApp #bar { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; padding: 4px 12px clamp(7px, 1.4vh, 13px); }
+#ccApp button.big {
+  font: inherit; font-weight: bold; font-size: clamp(10.5px, 1.5vh, 13.5px);
+  padding: clamp(5px, 1vh, 9px) clamp(10px, 1.5vw, 16px); border: 3px solid var(--cc-ink);
+  border-radius: 999px; background: var(--cc-wool); color: var(--cc-ink); cursor: pointer;
+  box-shadow: 0 3px 0 var(--cc-ink); position: relative; overflow: hidden;
+}
+#ccApp button.big:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--cc-ink); }
+#ccApp button.big:disabled { opacity: .4; cursor: default; box-shadow: 0 3px 0 rgba(43, 36, 29, .4); }
+#ccApp #bListen { background: var(--cc-amber); }
+#ccApp .mid { background: #F6C8C3; }
+#ccApp .top { background: #D9D0EC; }
+#ccApp button.loading::after {
+  content: ''; position: absolute; inset: 0; background: rgba(43, 36, 29, .26);
+  transform-origin: left center; transform: scaleX(var(--prog, 0));
+}
+
