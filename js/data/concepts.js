@@ -51,7 +51,7 @@ export const CONCEPTS = [
     quiz: { type: 'ear-training', config: { question: 'How many different notes did you hear stacked together?', playNotes: ['C4', 'E4', 'G4'], options: ['1', '2', '3', '4'], correctIndex: 2 } } },
   { id: 'chord-progressions',section: 'harmony',     order: 3,  title: 'Chord Progressions',
     definition: "A chord progression is a sequence of chords played one after another to build a song's harmony.",
-    toy: { type: 'stacking-toy', config: { label: 'Click each chord, then play them in order!', playMode: 'sequence', blocks: [ { label: 'I (C)', notes: ['C4','E4','G4'] }, { label: 'IV (F)', notes: ['F4','A4','C5'] }, { label: 'V (G)', notes: ['G4','B4','D5'] }, { label: 'I (C)', notes: ['C4','E4','G4'] } ] } },
+    toy: { type: 'chord-progressions-toy', config: {} },
     quiz: { type: 'listen-and-order', config: { label: 'Listen to the chord progression, then put the chords back in order!', sequence: [ { label: 'I (C)', notes: ['C4','E4','G4'] }, { label: 'IV (F)', notes: ['F4','A4','C5'] }, { label: 'V (G)', notes: ['G4','B4','D5'] } ] } } },
   { id: 'seven-modes',       section: 'harmony',     order: 4,  title: 'The Seven Modes',
     definition: 'Modes are seven different scales, each starting on a different note of the major scale, each with its own mood.',
