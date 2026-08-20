@@ -5,13 +5,15 @@ import { renderKeyboard } from './instruments/keyboard.js';
 import { renderDrumPad } from './instruments/drumPad.js';
 import { renderSliderToy } from './toys/sliderToy.js';
 import { renderKeyboardHighlightToy } from './toys/keyboardHighlightToy.js';
-import { renderWheelToy } from './toys/wheelToy.js';
 import { renderStackingToy } from './toys/stackingToy.js';
+import { renderIntervalsToy, stopIntervalsToy } from './toys/intervalsToy.js';
 import { renderComposerToy } from './toys/composerToy.js';
 import { renderNoteWheelToy, stopNoteWheelToy } from './toys/noteWheelToy.js';
 import { renderHopTrailToy, stopHopTrailToy } from './toys/hopTrailToy.js';
 import { renderMajorScaleToy, stopMajorScaleToy } from './toys/majorScaleToy.js';
 import { renderMinorScaleToy, stopMinorScaleToy } from './toys/minorScaleToy.js';
+import { renderBuildingChordsToy, stopBuildingChordsToy } from './toys/buildingChordsToy.js';
+import { renderChordProgressionsToy, stopChordProgressionsToy } from './toys/chordProgressionsToy.js';
 import { renderQuiz } from './quiz.js';
 import { renderBeatArcToy, stopBeatArcToy } from './toys/beatArcToy.js';
 import { renderRhythmStackToy, stopRhythmStackToy } from './toys/rhythmStackToy.js';
@@ -78,8 +80,6 @@ function renderToy(concept) {
     renderSliderToy(toyContainer, config);
   } else if (type === 'keyboard-highlight-toy') {
     renderKeyboardHighlightToy(toyContainer, config);
-  } else if (type === 'wheel-toy') {
-    renderWheelToy(toyContainer, config);
   } else if (type === 'stacking-toy') {
     renderStackingToy(toyContainer, config);
   } else if (type === 'composer-toy') {
@@ -100,6 +100,12 @@ function renderToy(concept) {
     renderMajorScaleToy(toyContainer, config);
   } else if (type === 'minor-scale-toy') {
     renderMinorScaleToy(toyContainer, config);
+  } else if (type === 'intervals-toy') {
+    renderIntervalsToy(toyContainer, config);
+  } else if (type === 'building-chords-toy') {
+    renderBuildingChordsToy(toyContainer, config);
+  } else if (type === 'chord-progressions-toy') {
+    renderChordProgressionsToy(toyContainer, config);
   } else {
     toyContainer.innerHTML = 'No toy for this concept yet.';
   }
@@ -155,6 +161,9 @@ export function closePopup() {
   stopHopTrailToy();
   stopMajorScaleToy();
   stopMinorScaleToy();
+  stopIntervalsToy();
+  stopBuildingChordsToy();
+  stopChordProgressionsToy();
 }
 
 closeButton.addEventListener('click', closePopup);

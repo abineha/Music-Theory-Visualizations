@@ -215,7 +215,7 @@ export function renderHopTrailToy(container, config = {}) {
       + (steps.length ? `<text x="${PADX}" y="${sy - 12}" font-size="14" opacity=".55">H = half step &nbsp;&nbsp; W = whole step</text>` : '');
 
     const lp = pts[pts.length - 1];
-    gSully.innerHTML = sullySVG(lp.x, lp.y - R * 1.25 - 4, dir, Math.max(.34, Math.min(.52, R / 34)), walkFrame);
+    gSully.innerHTML = sullySVG(lp.x, lp.y - R * 1.25 - 4, 1, Math.max(.34, Math.min(.52, R / 34)), walkFrame);
     gTip.innerHTML = steps.length ? '' :
       `<text x="${W / 2}" y="${H - 180}" text-anchor="middle" font-size="19" opacity=".55">press a hop button to begin</text>`;
 

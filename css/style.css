@@ -617,45 +617,6 @@ html, body {
   background: var(--button-active);
 }
 
-.toy-wheel-wrapper {
-  text-align: center;
-}
-
-.toy-wheel {
-  position: relative;
-  width: 260px;
-  height: 260px;
-  margin: 10px auto;
-  border-radius: 50%;
-  border: 2px dashed rgba(217, 185, 138, 0.7);
-}
-
-.toy-wheel-slot {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 2px solid var(--accent-border);
-  background: var(--button-bg);
-  color: var(--ink);
-  font-weight: bold;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-
-.toy-wheel-slot:active {
-  background: var(--accent);
-  color: var(--ink);
-}
-
-.toy-wheel-result {
-  margin-top: 12px;
-  font-size: 1rem;
-  color: var(--accent-strong);
-  min-height: 1.4em;
-}
-
 .toy-stack-wrapper {
   text-align: center;
 }
@@ -2230,6 +2191,94 @@ html, body {
   }
 }
 
+#sbApp {
+  --sb-ink: #2B241D;
+  --sb-parchment: #F7F1DF;
+  --sb-wool: #F7F4ED;
+  --sb-ga: #90C884;
+  --sb-gb: #85C278;
+  --sb-amber: #EFC03F;
+  --rose: #D8524B;
+  --green: #3E7A34;
+  --cream: #FFF3C4;
+
+  background: var(--sb-gb);
+  background-image:
+    linear-gradient(45deg, var(--sb-ga) 25%, transparent 25%, transparent 75%, var(--sb-ga) 75%),
+    linear-gradient(45deg, var(--sb-ga) 25%, transparent 25%, transparent 75%, var(--sb-ga) 75%);
+  background-size: 64px 64px;
+  background-position: 0 0, 32px 32px;
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+  color: var(--sb-ink);
+  border: 5px solid var(--sb-ink);
+  border-radius: 22px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, .18);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto;
+  min-height: 460px;
+  margin-top: 24px;
+}
+
+#sbApp * { box-sizing: border-box; }
+
+#sbApp #head { padding: 9px 18px 2px; text-align: center; }
+#sbApp #head h1 { font-size: clamp(15px, 2.4vh, 23px); }
+#sbApp #head p { font-size: clamp(11px, 1.6vh, 14px); opacity: .72; }
+
+#sbApp #stage { position: relative; min-height: 0; touch-action: none; }
+#sbApp #stage svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(260px, 30vh);
+  margin: 0 auto;
+}
+
+#sbApp #slide { padding: 2px clamp(18px, 5vw, 64px) 4px; }
+#sbApp #pos { -webkit-appearance: none; appearance: none; width: 100%; height: 26px; background: transparent; cursor: pointer; }
+#sbApp #pos::-webkit-slider-runnable-track { height: 14px; border-radius: 999px; background: #DCD2B9; border: 3px solid var(--sb-ink); }
+#sbApp #pos::-moz-range-track { height: 14px; border-radius: 999px; background: #DCD2B9; border: 3px solid var(--sb-ink); }
+#sbApp #pos::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -10px; border-radius: 50%; background: var(--sb-amber); border: 4px solid var(--sb-ink); box-shadow: 0 2px 0 rgba(43, 36, 29, .4); }
+#sbApp #pos::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: var(--sb-amber); border: 4px solid var(--sb-ink); }
+#sbApp #pos:disabled { opacity: .4; cursor: default; }
+
+#sbApp #roots { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 2px 12px 4px; flex-wrap: wrap; }
+#sbApp .rlbl { font-size: clamp(10px, 1.5vh, 13px); opacity: .6; text-transform: uppercase; letter-spacing: .06em; }
+#sbApp #rchips { display: flex; gap: 4px; }
+#sbApp .rc {
+  font: inherit; font-weight: bold; font-size: clamp(11px, 1.7vh, 14px);
+  min-width: clamp(30px, 3.4vw, 40px); padding: clamp(4px, .8vh, 7px) 4px; text-align: center;
+  border: 3px solid var(--sb-ink); border-radius: 10px; cursor: pointer;
+  box-shadow: 0 3px 0 var(--sb-ink); background: var(--sb-wool); color: var(--sb-ink);
+}
+#sbApp .rc.acc { background: #8C836F; color: #F7F1DF; }
+#sbApp .rc.sel { background: var(--sb-amber); }
+#sbApp .rc:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--sb-ink); }
+#sbApp .rc:disabled { opacity: .4; cursor: default; }
+
+#sbApp #status { text-align: center; padding: 2px 14px 4px; }
+#sbApp #big { font-size: clamp(17px, 3.2vh, 28px); font-weight: bold; line-height: 1.2; min-height: 1.25em; }
+#sbApp #lanterns { display: flex; gap: 9px; justify-content: center; margin-top: 5px; }
+#sbApp .lan { width: clamp(26px, 4vh, 36px); height: clamp(26px, 4vh, 36px); }
+
+#sbApp #bar { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; padding: 5px 12px clamp(8px, 1.5vh, 14px); }
+#sbApp button {
+  font: inherit; font-weight: bold; font-size: clamp(12px, 1.8vh, 16px);
+  padding: clamp(7px, 1.2vh, 11px) clamp(14px, 2vw, 24px); border: 4px solid var(--sb-ink);
+  border-radius: 999px; background: var(--sb-wool); color: var(--sb-ink); cursor: pointer;
+  box-shadow: 0 4px 0 var(--sb-ink); position: relative; overflow: hidden;
+}
+#sbApp button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--sb-ink); }
+#sbApp #bListen { background: var(--sb-amber); }
+#sbApp button.loading::after {
+  content: ''; position: absolute; inset: 0; background: rgba(43, 36, 29, .26);
+  transform-origin: left center; transform: scaleX(var(--prog, 0));
+}
+#sbApp button:disabled { opacity: .4; cursor: default; box-shadow: 0 4px 0 rgba(43, 36, 29, .4); }
+#sbApp button.on { background: #BFE6A8; }
+
 @property --ms-ga {
   syntax: '<color>';
   inherits: true;
@@ -2708,5 +2757,160 @@ html, body {
 
 .voice-toy__swatch--width {
   background: #c9d3d9;
+}
+
+#ccApp {
+  --cc-ink: #2B241D;
+  --cc-wool: #F7F4ED;
+  --cc-amber: #EFC03F;
+
+  background: #85C278;
+  background-image:
+    linear-gradient(45deg, #90C884 25%, transparent 25%, transparent 75%, #90C884 75%),
+    linear-gradient(45deg, #90C884 25%, transparent 25%, transparent 75%, #90C884 75%);
+  background-size: 64px 64px;
+  background-position: 0 0, 32px 32px;
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+  color: var(--cc-ink);
+  border: 5px solid var(--cc-ink);
+  border-radius: 22px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, .18);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+  transition: background .8s ease;
+  min-height: 460px;
+  margin-top: 24px;
+}
+
+#ccApp * { box-sizing: border-box; }
+
+#ccApp #head { padding: 8px 18px 1px; text-align: center; }
+#ccApp #head h1 { font-size: clamp(15px, 2.3vh, 22px); }
+#ccApp #head p { font-size: clamp(10px, 1.5vh, 13px); opacity: .72; }
+
+#ccApp #stage { position: relative; min-height: 0; touch-action: none; }
+#ccApp #stage svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(280px, 32vh);
+  margin: 0 auto;
+}
+
+#ccApp #roots { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 3px 12px 2px; flex-wrap: wrap; }
+#ccApp .rlbl { font-size: clamp(9px, 1.4vh, 12px); opacity: .6; text-transform: uppercase; letter-spacing: .06em; }
+#ccApp #rchips { display: flex; gap: 4px; }
+#ccApp .rc {
+  font: inherit; font-weight: bold; font-size: clamp(10.5px, 1.6vh, 13.5px);
+  min-width: clamp(28px, 3.2vw, 38px); padding: clamp(4px, .75vh, 7px) 3px; text-align: center;
+  border: 3px solid var(--cc-ink); border-radius: 10px; cursor: pointer;
+  box-shadow: 0 3px 0 var(--cc-ink); background: var(--cc-wool); color: var(--cc-ink);
+}
+#ccApp .rc.acc { background: #8C836F; color: #F7F1DF; }
+#ccApp .rc.sel { background: var(--cc-amber); }
+#ccApp .rc:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--cc-ink); }
+#ccApp .rc:disabled { opacity: .4; cursor: default; }
+
+#ccApp #status { text-align: center; padding: 2px 14px 3px; }
+#ccApp #big { font-size: clamp(16px, 3vh, 26px); font-weight: bold; line-height: 1.2; min-height: 1.25em; }
+#ccApp #sub { font-size: clamp(10px, 1.5vh, 13px); opacity: .75; min-height: 1.2em; }
+#ccApp #skies { display: flex; gap: 8px; justify-content: center; margin-top: 4px; align-items: center; }
+#ccApp .sk { width: clamp(26px, 3.9vh, 38px); height: clamp(26px, 3.9vh, 38px); background: none; border: none; padding: 0; cursor: pointer; display: block; }
+#ccApp .sk:active { transform: translateY(2px); }
+#ccApp .sk:disabled { cursor: default; opacity: .5; }
+#ccApp .skwrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+#ccApp .skwrap span { font-size: clamp(8px, 1.15vh, 10px); opacity: .6; }
+
+#ccApp #bar { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; padding: 4px 12px clamp(7px, 1.4vh, 13px); }
+#ccApp button.big {
+  font: inherit; font-weight: bold; font-size: clamp(10.5px, 1.5vh, 13.5px);
+  padding: clamp(5px, 1vh, 9px) clamp(10px, 1.5vw, 16px); border: 3px solid var(--cc-ink);
+  border-radius: 999px; background: var(--cc-wool); color: var(--cc-ink); cursor: pointer;
+  box-shadow: 0 3px 0 var(--cc-ink); position: relative; overflow: hidden;
+}
+#ccApp button.big:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--cc-ink); }
+#ccApp button.big:disabled { opacity: .4; cursor: default; box-shadow: 0 3px 0 rgba(43, 36, 29, .4); }
+#ccApp #bListen { background: var(--cc-amber); }
+#ccApp .mid { background: #F6C8C3; }
+#ccApp .top { background: #D9D0EC; }
+#ccApp button.loading::after {
+  content: ''; position: absolute; inset: 0; background: rgba(43, 36, 29, .26);
+  transform-origin: left center; transform: scaleX(var(--prog, 0));
+}
+
+#cpApp {
+  --cp-ink: #2B241D;
+  --cp-paper: #F7F1DF;
+  --cp-wool: #F7F4ED;
+  --cp-amber: #EFC03F;
+
+  background: #85C278;
+  background-image:
+    linear-gradient(45deg, #90C884 25%, transparent 25%, transparent 75%, #90C884 75%),
+    linear-gradient(45deg, #90C884 25%, transparent 25%, transparent 75%, #90C884 75%);
+  background-size: 64px 64px;
+  background-position: 0 0, 32px 32px;
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+  color: var(--cp-ink);
+  border: 5px solid var(--cp-ink);
+  border-radius: 24px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, .18);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+  row-gap: clamp(6px, 1.1vh, 12px);
+  padding-bottom: clamp(6px, 1.1vh, 12px);
+  min-height: 460px;
+  margin-top: 24px;
+}
+
+#cpApp * { box-sizing: border-box; }
+
+#cpApp #head { padding: clamp(8px, 1.4vh, 14px) 22px 0; text-align: center; }
+#cpApp #head h1 { font-size: clamp(18px, 3vh, 30px); }
+#cpApp #head p { font-size: clamp(12px, 1.9vh, 17px); opacity: .75; }
+
+#cpApp #stage { position: relative; min-height: 0; touch-action: none; }
+#cpApp #stage svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(280px, 32vh);
+  margin: 0 auto;
+}
+
+#cpApp #keys { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 16px; flex-wrap: wrap; }
+#cpApp .klbl { font-size: clamp(11px, 1.7vh, 15px); opacity: .65; text-transform: uppercase; letter-spacing: .06em; }
+#cpApp .kc {
+  font: inherit; font-weight: bold; font-size: clamp(13px, 2vh, 17px);
+  min-width: clamp(36px, 3.9vw, 48px); padding: clamp(6px, 1vh, 10px) 4px; text-align: center;
+  border: 3px solid var(--cp-ink); border-radius: 9px; cursor: pointer;
+  box-shadow: 0 3px 0 var(--cp-ink); background: var(--cp-wool); color: var(--cp-ink);
+}
+#cpApp .kc.acc { background: #8C836F; color: #F7F1DF; }
+#cpApp .kc.sel { background: var(--cp-amber); }
+#cpApp .kc:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--cp-ink); }
+#cpApp .kc:disabled { opacity: .4; cursor: default; }
+
+#cpApp #status { text-align: center; padding: 0 18px; }
+#cpApp #big { font-size: clamp(17px, 2.9vh, 27px); font-weight: bold; min-height: 1.2em; line-height: 1.25; }
+#cpApp #sub { font-size: clamp(12px, 1.9vh, 17px); opacity: .78; min-height: 1.2em; letter-spacing: .01em; }
+
+#cpApp #bar { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; padding: 0 16px; }
+#cpApp button.big {
+  font: inherit; font-weight: bold; font-size: clamp(14px, 2.1vh, 19px);
+  padding: clamp(9px, 1.5vh, 15px) clamp(18px, 2.4vw, 30px); border: 4px solid var(--cp-ink);
+  border-radius: 999px; background: var(--cp-wool); color: var(--cp-ink); cursor: pointer;
+  box-shadow: 0 5px 0 var(--cp-ink); position: relative; overflow: hidden;
+}
+#cpApp button.big:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--cp-ink); }
+#cpApp button.big:disabled { opacity: .4; cursor: default; box-shadow: 0 3px 0 rgba(43, 36, 29, .4); }
+#cpApp #bPush { background: var(--cp-amber); }
+#cpApp button.loading::after {
+  content: ''; position: absolute; inset: 0; background: rgba(43, 36, 29, .26);
+  transform-origin: left center; transform: scaleX(var(--prog, 0));
 }
 
