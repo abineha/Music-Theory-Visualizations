@@ -7,13 +7,13 @@ import { renderSliderToy } from './toys/sliderToy.js';
 import { renderKeyboardHighlightToy } from './toys/keyboardHighlightToy.js';
 import { renderStackingToy } from './toys/stackingToy.js';
 import { renderIntervalsToy, stopIntervalsToy } from './toys/intervalsToy.js';
-import { renderComposerToy } from './toys/composerToy.js';
 import { renderNoteWheelToy, stopNoteWheelToy } from './toys/noteWheelToy.js';
 import { renderHopTrailToy, stopHopTrailToy } from './toys/hopTrailToy.js';
 import { renderMajorScaleToy, stopMajorScaleToy } from './toys/majorScaleToy.js';
 import { renderMinorScaleToy, stopMinorScaleToy } from './toys/minorScaleToy.js';
 import { renderBuildingChordsToy, stopBuildingChordsToy } from './toys/buildingChordsToy.js';
 import { renderChordProgressionsToy, stopChordProgressionsToy } from './toys/chordProgressionsToy.js';
+import { renderSullysStudioToy, stopSullysStudioToy } from './toys/sullysStudioToy.js';
 import { renderQuiz } from './quiz.js';
 import { renderBeatArcToy, stopBeatArcToy } from './toys/beatArcToy.js';
 import { renderRhythmStackToy, stopRhythmStackToy } from './toys/rhythmStackToy.js';
@@ -82,8 +82,6 @@ function renderToy(concept) {
     renderKeyboardHighlightToy(toyContainer, config);
   } else if (type === 'stacking-toy') {
     renderStackingToy(toyContainer, config);
-  } else if (type === 'composer-toy') {
-    renderComposerToy(toyContainer, config);
   } else if (type === 'beat-arc-toy') {
     renderBeatArcToy(toyContainer, config);
   } else if (type === 'herd-stack-toy') {
@@ -106,6 +104,8 @@ function renderToy(concept) {
     renderBuildingChordsToy(toyContainer, config);
   } else if (type === 'chord-progressions-toy') {
     renderChordProgressionsToy(toyContainer, config);
+  } else if (type === 'sullys-studio-toy') {
+    renderSullysStudioToy(toyContainer, config);
   } else {
     toyContainer.innerHTML = 'No toy for this concept yet.';
   }
@@ -164,6 +164,7 @@ export function closePopup() {
   stopIntervalsToy();
   stopBuildingChordsToy();
   stopChordProgressionsToy();
+  stopSullysStudioToy();
 }
 
 closeButton.addEventListener('click', closePopup);
