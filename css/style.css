@@ -645,59 +645,6 @@ html, body {
   color: var(--ink);
 }
 
-.toy-composer-wrapper {
-  text-align: center;
-}
-
-.toy-composer-slots {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin: 16px 0;
-}
-
-.toy-composer-slot {
-  width: 36px;
-  height: 36px;
-  border: 2px dashed rgba(217, 185, 138, 0.8);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent-strong);
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.toy-composer-palette {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-
-.toy-composer-note {
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-  border: 2px solid var(--accent-border);
-  background: var(--button-bg);
-  color: var(--ink);
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.toy-composer-note:active {
-  background: var(--button-active);
-}
-
-.toy-composer-controls {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-
 .toy-clear-button {
   padding: 16px 24px;
   font-size: 1rem;
@@ -2912,5 +2859,91 @@ html, body {
 #cpApp button.loading::after {
   content: ''; position: absolute; inset: 0; background: rgba(43, 36, 29, .26);
   transform-origin: left center; transform: scaleX(var(--prog, 0));
+}
+
+#ssApp {
+  --ss-ink: #2B241D;
+  --ss-wool: #F7F4ED;
+  --ss-amber: #EFC03F;
+
+  background: #85C278;
+  background-image:
+    linear-gradient(45deg, #90C884 25%, transparent 25%, transparent 75%, #90C884 75%),
+    linear-gradient(45deg, #90C884 25%, transparent 25%, transparent 75%, #90C884 75%);
+  background-size: 64px 64px;
+  background-position: 0 0, 32px 32px;
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+  color: var(--ss-ink);
+  border: 5px solid var(--ss-ink);
+  border-radius: 22px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, .18);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 460px;
+  margin-top: 24px;
+}
+
+#ssApp * { box-sizing: border-box; }
+
+#ssApp #head { padding: 8px 18px 0; text-align: center; position: relative; }
+#ssApp #head h1 { font-size: clamp(16px, 2.4vh, 24px); }
+#ssApp #roomBadge {
+  display: inline-block; margin-top: 2px; font-size: clamp(10px, 1.4vh, 12px);
+  opacity: .6; text-transform: uppercase; letter-spacing: .06em;
+}
+#ssApp #roomLines { font-size: clamp(11px, 1.7vh, 15px); opacity: .78; margin-top: 3px; line-height: 1.4; }
+
+#ssApp #stage { position: relative; min-height: 0; max-height: min(300px, 34vh); touch-action: none; padding: 8px 14px; }
+#ssApp #grid { display: block; border-radius: 12px; touch-action: none; cursor: pointer; }
+
+#ssApp #bar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; justify-content: center; padding: 4px 12px clamp(8px, 1.4vh, 14px); }
+#ssApp button.big {
+  font: inherit; font-weight: bold; font-size: clamp(12px, 1.7vh, 15px);
+  padding: clamp(7px, 1.1vh, 11px) clamp(14px, 2vw, 22px); border: 3px solid var(--ss-ink);
+  border-radius: 999px; background: var(--ss-wool); color: var(--ss-ink); cursor: pointer;
+  box-shadow: 0 3px 0 var(--ss-ink); position: relative; overflow: hidden;
+}
+#ssApp button.big:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ss-ink); }
+#ssApp button.big:disabled { opacity: .4; cursor: default; box-shadow: 0 3px 0 rgba(43, 36, 29, .4); }
+#ssApp #bPlay { background: var(--ss-amber); }
+#ssApp button.big.on { background: #D9D0EC; }
+#ssApp button.big.hidden { display: none; }
+
+#ssApp button.nav {
+  font: inherit; font-weight: bold; font-size: clamp(14px, 2vh, 18px);
+  width: clamp(32px, 4.4vh, 42px); height: clamp(32px, 4.4vh, 42px);
+  border: 3px solid var(--ss-ink); border-radius: 50%; background: var(--ss-wool);
+  color: var(--ss-ink); cursor: pointer; box-shadow: 0 3px 0 var(--ss-ink);
+  display: flex; align-items: center; justify-content: center;
+}
+#ssApp button.nav:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ss-ink); }
+#ssApp button.nav:disabled { opacity: .35; cursor: default; box-shadow: 0 3px 0 rgba(43, 36, 29, .35); }
+
+#ssApp #shelfPanel {
+  position: absolute; inset: 8px 14px; z-index: 5; overflow-y: auto;
+  background: var(--ss-wool); border: 3px solid var(--ss-ink); border-radius: 12px;
+  padding: clamp(8px, 1.3vh, 14px);
+}
+#ssApp #shelfPanel.hidden { display: none; }
+#ssApp #shelfHeader {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px dashed rgba(43, 36, 29, .2);
+}
+#ssApp #shelfTitle { font-weight: bold; font-size: clamp(13px, 1.9vh, 16px); }
+#ssApp #shelfMsg { font-size: clamp(10px, 1.4vh, 12px); opacity: .75; }
+#ssApp #shelfJars { display: flex; flex-wrap: wrap; gap: 10px; }
+#ssApp #shelfEmpty { opacity: .6; font-size: clamp(11px, 1.6vh, 13px); }
+#ssApp .jar {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: 62px; padding: 8px 4px; border: 3px solid var(--ss-ink); border-radius: 12px;
+  background: color-mix(in srgb, var(--jar-col, var(--ss-amber)) 55%, #fff);
+  cursor: pointer; box-shadow: 0 3px 0 var(--ss-ink);
+}
+#ssApp .jar:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ss-ink); }
+#ssApp .jar-code {
+  font-family: ui-monospace, Menlo, monospace; font-size: 11px; font-weight: bold;
+  color: var(--ss-ink); word-break: break-all; text-align: center;
 }
 

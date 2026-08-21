@@ -55,7 +55,7 @@ export const CONCEPTS = [
     quiz: { type: 'listen-and-order', config: { label: 'Listen to the chord progression, then put the chords back in order!', sequence: [ { label: 'I (C)', notes: ['C4','E4','G4'] }, { label: 'IV (F)', notes: ['F4','A4','C5'] }, { label: 'V (G)', notes: ['G4','B4','D5'] } ] } } },
 
   { id: 'make-your-song',    section: 'playground',  order: 1,  title: 'Make your song!',
-    definition: 'Put together your own tune by picking notes in whatever order sounds good to you.',
-    toy: { type: 'composer-toy', config: { scale: ['C4','D4','E4','F4','G4','A4','B4','C5'], slotCount: 8, label: 'Click notes below to make your own song!' } },
+    definition: 'Walk through Sully\'s four huts, adding one new idea in each, to build a song of your very own.',
+    toy: { type: 'sullys-studio-toy', config: {} },
     quiz: { type: 'listen-and-order', config: { label: 'Listen to the mini tune, then put the notes back in order!', sequence: [ { label: 'Drum', notes: ['C3'] }, { label: 'Bass', notes: ['G3'] }, { label: 'Melody', notes: ['C5'] } ] } } },
 ];
