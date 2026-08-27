@@ -11,6 +11,9 @@ const W = 1040, H = 440, X0 = 64, X1 = 976, SY = 252;
 const px = (i) => X0 + (X1 - X0) * i / 12;
 const SULLY_SIZE = 170;
 const G1 = .52, G2 = 1.04, G3 = 1.6, END = 3.3;
+const COAT = { root: '#F7F4ED', mid: '#F6C8C3', top: '#D9D0EC' };
+const NAMES = { root: 'Sully', mid: 'Sis Sully', top: 'Baby Sully' };
+const nameTag = (key) => `<span style="background:${COAT[key]};padding:1px 7px;border-radius:7px;border:1.5px solid #2B241D;font-weight:bold;white-space:nowrap;">${NAMES[key]}</span>`;
 
 const SKY = {
   sun: { a: '#CFE7F5', b: '#F7E6BC', ground: '#8FBE68', paper: '#F7F1DF', up: '#B03A34', dn: '#4A3C86', ink: '#2B241D' },
@@ -55,7 +58,7 @@ export function renderBuildingChordsToy(container, config = {}) {
 <div id="ccApp">
   <div id="head">
     <h1>Sully's Choir</h1>
-    <p>Three goats sing at once. Move Sully <b>#2</b> and watch the sky.</p>
+    <p>Three goats sing at once. Move ${nameTag('mid')} and watch the sky.</p>
   </div>
 
   <div id="stage">
@@ -73,7 +76,7 @@ export function renderBuildingChordsToy(container, config = {}) {
     </svg>
   </div>
 
-  <div id="roots"><span class="rlbl">Sully #1 sings</span><span id="rchips"></span></div>
+  <div id="roots"><span class="rlbl">${nameTag('root')} sings</span><span id="rchips"></span></div>
 
   <div id="status">
     <div id="big"></div>
@@ -82,11 +85,11 @@ export function renderBuildingChordsToy(container, config = {}) {
   </div>
 
   <div id="bar">
-    <button class="big mid" id="mL">Sully #2 &larr;</button>
-    <button class="big mid" id="mR">Sully #2 &rarr;</button>
+    <button class="big mid" id="mL">Sis Sully &larr;</button>
+    <button class="big mid" id="mR">Sis Sully &rarr;</button>
     <button class="big" id="bListen">Listen again</button>
-    <button class="big top" id="tL">Sully #3 &larr;</button>
-    <button class="big top" id="tR">Sully #3 &rarr;</button>
+    <button class="big top" id="tL">Baby Sully &larr;</button>
+    <button class="big top" id="tR">Baby Sully &rarr;</button>
     <button class="big" id="bNew">Start again</button>
   </div>
 </div>`;
@@ -126,16 +129,19 @@ export function renderBuildingChordsToy(container, config = {}) {
     root_.style.background = s.paper;
   }
 
-  function sullySVG(x, y, coat, lift, frame, label) {
-    return `<g transform="translate(${x.toFixed(1)},${(y - 52 - lift).toFixed(1)})">
-        <rect x="-21" y="-19" width="42" height="27" rx="9" fill="${coat}"
+  function sullySVG(x, y, coat, lift, idx, key) {
+    const label = NAMES[key];
+    const w = label.length * 7.3 + 16;
+    return `<g transform="translate(${x.toFixed(1)},${(y - 84 - lift).toFixed(1)})">
+        <rect x="${(-w / 2).toFixed(1)}" y="-19" width="${w.toFixed(1)}" height="27" rx="9" fill="${coat}"
           stroke="#2B241D" stroke-width="3.5"/>
-        <text x="0" y="1" text-anchor="middle" font-weight="bold" font-size="16"
+        <text x="0" y="1" text-anchor="middle" font-weight="bold" font-size="13"
           font-family="Trebuchet MS,sans-serif" fill="#2B241D">${label}</text>
       </g>
       <g transform="translate(${x.toFixed(1)},${(y - lift).toFixed(1)}) scale(.42)">
+      <ellipse cx="0" cy="10" rx="48" ry="10" fill="${coat}" opacity=".55"/>
       <ellipse cx="0" cy="10" rx="42" ry="7" fill="rgba(20,20,20,.22)"/>
-      <image href="assets/images/goat/goat_r_${frame}.png" width="${SULLY_SIZE}" height="${SULLY_SIZE}"
+      <image href="assets/images/node10/${idx}.png" width="${SULLY_SIZE}" height="${SULLY_SIZE}"
         x="${-SULLY_SIZE / 2}" y="${-SULLY_SIZE}"/>
     </g>`;
   }
@@ -174,15 +180,15 @@ export function renderBuildingChordsToy(container, config = {}) {
     gArcs.innerHTML = a;
 
     gGoats.innerHTML =
-        sullySVG(px(0), SY - 16, '#F7F4ED', bop[0] * 18, bop[0] > 0.5 ? 2 : 1, '#1')
-      + sullySVG(px(mid), SY - 16, '#F6C8C3', bop[1] * 18, bop[1] > 0.5 ? 2 : 1, '#2')
-      + sullySVG(px(hiG), SY - 16, '#D9D0EC', bop[2] * 18, bop[2] > 0.5 ? 2 : 1, '#3');
+        sullySVG(px(0), SY - 16, COAT.root, bop[0] * 18, 1, 'root')
+      + sullySVG(px(mid), SY - 16, COAT.mid, bop[1] * 18, 2, 'mid')
+      + sullySVG(px(hiG), SY - 16, COAT.top, bop[2] * 18, 3, 'top');
 
     const notes = `${nameAt(0)} ${nameAt(mid)} ${nameAt(hiG)}`;
     $('big').innerHTML = sh
       ? `<b>${nameAt(0)} ${sh.word}</b>. ${sh.line}`
       : 'The Sullys look confused. Try another spot.';
-    $('sub').textContent = `${notes}   \u00B7   Sully #2 is ${mid} steps up, Sully #3 is ${hiG} steps up`;
+    $('sub').innerHTML = `${notes}   \u00B7   ${nameTag('mid')} is ${mid} steps up, ${nameTag('top')} is ${hiG} steps up`;
 
     const sig = [...found].sort().join(',') + '|' + (shape() ? shape().key : '-');
     if (sig !== skiesSig) {

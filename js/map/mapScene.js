@@ -36,17 +36,7 @@ const NODE1_HIT_MIN_VELOCITY = 0.12; // quietest audible hit, at the edge of pro
 let node1WasDownPose = false;
 
 const NODE2_CONCEPT_ID = 'rhythm-patterns';
-const NODE2_FRAMES = {
-  undone: [
-    loadImage('assets/images/node2/goat-a.png'),
-    loadImage('assets/images/node2/goat-b.png'),
-  ],
-  done: [
-    loadImage('assets/images/node2/goat-a-done.png'),
-    loadImage('assets/images/node2/goat-b-done.png'),
-  ],
-};
-const NODE2_BEAT_HIT_PHASE = 0.18;
+const NODE2_IMAGE = loadImage('assets/images/node2/Tambourine.gif');
 const NODE2_BOB_AMPLITUDE = 6;
 const NODE2_BOB_PERIOD_MS = 260;
 const NODE2_HIT_MIN_VELOCITY = 0.12;
@@ -110,6 +100,10 @@ const NODE4_PROXIMITY_MIN_SCALE = 0.15; // even the "loud" pass fades near the e
 let node4MelodyIndex = 0;
 let node4IsLoudPass = false;
 let node4LastBeatPhase = 0;
+
+const NODE12_CONCEPT_ID = 'make-your-song';
+const NODE12_IMAGE = loadImage('assets/images/node12/ukulele__1.png');
+const NODE12_MARKER_SIZE = NODE_MARKER_SIZE * 1.8; // sole node in its panel, so it can run larger without crowding
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -357,9 +351,40 @@ function drawSingleNode(ctx, concept, cameraX, cameraY, viewWidth, viewHeight) {
     drawNode3(ctx, concept, x, y, screenX, screenY);
   } else if (concept.id === NODE4_CONCEPT_ID) {
     drawNode4(ctx, concept, x, y, screenX, screenY);
+  } else if (concept.id === NODE12_CONCEPT_ID) {
+    drawNode12(ctx, concept, screenX, screenY);
   } else {
     drawGenericNode(ctx, concept, screenX, screenY);
   }
+}
+
+function drawNode12(ctx, concept, screenX, screenY) {
+  const frame = NODE12_IMAGE;
+  let drawWidth = NODE_MARKER_SIZE;
+  let drawHeight = NODE_MARKER_SIZE;
+
+  if (frame.complete && frame.naturalWidth > 0) {
+    const scale = Math.min(NODE12_MARKER_SIZE / frame.naturalWidth, NODE12_MARKER_SIZE / frame.naturalHeight);
+    drawWidth = frame.naturalWidth * scale;
+    drawHeight = frame.naturalHeight * scale;
+    ctx.drawImage(
+      frame,
+      screenX - drawWidth / 2,
+      screenY - drawHeight,
+      drawWidth,
+      drawHeight
+    );
+  }
+
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.textAlign = 'center';
+
+  if (isVisited(concept.id)) {
+    drawDoneBadge(ctx, screenX + drawWidth / 2 - 10, screenY - drawHeight - 15);
+  }
+
+  ctx.fillText(`${GLOBAL_ORDER.get(concept.id)}: ${concept.title}`, screenX, screenY + 40);
 }
 
 function drawGenericNode(ctx, concept, screenX, screenY) {
@@ -449,10 +474,7 @@ function drawNode2(ctx, concept, worldX, worldY, screenX, screenY) {
   const isDone = isVisited(concept.id);
   const reducedMotion = prefersReducedMotion();
   const animate = !reducedMotion && isAudioReady();
-  const pair = isDone ? NODE2_FRAMES.done : NODE2_FRAMES.undone;
-  const beatPhase = animate ? getBeatPhase() : 0;
-  const isDownPose = animate && beatPhase < NODE2_BEAT_HIT_PHASE;
-  const frame = isDownPose ? pair[1] : pair[0];
+  const frame = NODE2_IMAGE;
 
   let bobOffset = 0;
   let inRange = false;
