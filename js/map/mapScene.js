@@ -36,7 +36,14 @@ const NODE1_HIT_MIN_VELOCITY = 0.12; // quietest audible hit, at the edge of pro
 let node1WasDownPose = false;
 
 const NODE2_CONCEPT_ID = 'rhythm-patterns';
-const NODE2_IMAGE = loadImage('assets/images/node2/Tambourine.gif');
+
+const NODE2_GIF_FRAMES = [
+  loadImage('assets/images/node2/frames/frame-0.png'),
+  loadImage('assets/images/node2/frames/frame-1.png'),
+  loadImage('assets/images/node2/frames/frame-2.png'),
+  loadImage('assets/images/node2/frames/frame-3.png'),
+];
+const NODE2_GIF_FRAME_MS = 160;
 const NODE2_BOB_AMPLITUDE = 6;
 const NODE2_BOB_PERIOD_MS = 260;
 const NODE2_HIT_MIN_VELOCITY = 0.12;
@@ -474,7 +481,10 @@ function drawNode2(ctx, concept, worldX, worldY, screenX, screenY) {
   const isDone = isVisited(concept.id);
   const reducedMotion = prefersReducedMotion();
   const animate = !reducedMotion && isAudioReady();
-  const frame = NODE2_IMAGE;
+  const gifFrameIndex = reducedMotion
+    ? 0
+    : Math.floor(performance.now() / NODE2_GIF_FRAME_MS) % NODE2_GIF_FRAMES.length;
+  const frame = NODE2_GIF_FRAMES[gifFrameIndex];
 
   let bobOffset = 0;
   let inRange = false;
