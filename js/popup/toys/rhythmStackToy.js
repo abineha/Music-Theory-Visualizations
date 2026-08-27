@@ -7,11 +7,11 @@ const RHYTHM_STEPS = 16;
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const HERD = [
-  { key: 'whole',   name: 'Grandpa goat', label: 'whole note',      frac: '1',    hits: 1,  size: 74, color: '#a89ee0' },
-  { key: 'half',    name: 'Father goat',  label: 'half notes',      frac: '1/2',  hits: 2,  size: 63, color: '#b7c9ea' },
-  { key: 'quarter', name: 'Mama goat',    label: 'quarter notes',   frac: '1/4',  hits: 4,  size: 53, color: '#8fbb86' },
-  { key: 'eighth',  name: 'Kid goat',     label: 'eighth notes',    frac: '1/8',  hits: 8,  size: 43, color: '#8fcbb5' },
-  { key: 'six',     name: 'Baby goat',    label: 'sixteenth notes', frac: '1/16', hits: 16, size: 33, color: '#e8c98f' },
+  { key: 'whole',   name: 'Grandpa goat', label: 'whole note',      frac: '1',    hits: 1,  size: 74, color: '#a89ee0', img: 'assets/images/node2/1.png' },
+  { key: 'half',    name: 'Father goat',  label: 'half notes',      frac: '1/2',  hits: 2,  size: 63, color: '#b7c9ea', img: 'assets/images/node2/2.png' },
+  { key: 'quarter', name: 'Mama goat',    label: 'quarter notes',   frac: '1/4',  hits: 4,  size: 53, color: '#8fbb86', img: 'assets/images/node2/3.png' },
+  { key: 'eighth',  name: 'Kid goat',     label: 'eighth notes',    frac: '1/8',  hits: 8,  size: 43, color: '#8fcbb5', img: 'assets/images/node2/4.png' },
+  { key: 'six',     name: 'Baby goat',    label: 'sixteenth notes', frac: '1/16', hits: 16, size: 33, color: '#e8c98f', img: 'assets/images/node2/5.png' },
 ];
 
 const WALL_WIDTH = 640;
@@ -77,7 +77,7 @@ export function renderRhythmStackToy(container, config = {}) {
     goatButton.setAttribute('aria-label', `${g.name}, ${g.label}, ${g.hits} per bar`);
 
     const goatImg = document.createElement('img');
-    goatImg.src = 'assets/images/goat/goat_r_1.png';
+    goatImg.src = g.img;
     goatImg.alt = '';
     goatImg.style.width = `${g.size}px`;
     goatButton.appendChild(goatImg);
