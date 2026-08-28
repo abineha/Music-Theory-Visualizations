@@ -210,12 +210,6 @@ export function getRhythmStepIndex() {
   return rhythmStepIndex;
 }
 
-export function getRhythmStepPhase() {
-  const stepDuration = (60 / rhythmBpm) / 4;
-  const elapsed = beatContextTime() - lastRhythmStepTime;
-  return Math.min(1, Math.max(0, elapsed / stepDuration));
-}
-
 export function isAudioReady() {
   return audioReady;
 }
@@ -279,10 +273,6 @@ export function resetBeatBpm() {
 
 export function setBeatAudible(audible) {
   beatAudible = audible;
-}
-
-export function isBacktrackAudible() {
-  return audioReady && !ambientBus.mute && backtrack.volume.value > -50;
 }
 
 export function restoreBacktrack() {

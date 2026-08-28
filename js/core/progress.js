@@ -32,7 +32,3 @@ export function markQuizPassed(conceptId) {
 export function isVisited(conceptId) {
   return Boolean(progress[conceptId]?.visited);
 }
-
-export function isQuizPassed(conceptId) {
-  return Boolean(progress[conceptId]?.quizPassed);
-}

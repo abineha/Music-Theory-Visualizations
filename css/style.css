@@ -557,49 +557,6 @@ html, body {
   background: var(--button-active);
 }
 
-.toy-label {
-  font-size: 1rem;
-  margin-bottom: 16px;
-}
-
-.toy-slider-wrapper,
-.toy-demo-wrapper {
-  text-align: center;
-  padding-top: 20px;
-}
-
-.toy-slider {
-  width: 100%;
-  max-width: 400px;
-  height: 8px;
-  -webkit-appearance: none;
-  appearance: none;
-  border-radius: 4px;
-  background: var(--button-bg);
-  outline: none;
-  cursor: pointer;
-}
-
-.toy-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 3px solid var(--ink);
-  cursor: pointer;
-}
-
-.toy-slider::-moz-range-thumb {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 3px solid var(--ink);
-  cursor: pointer;
-}
-
 .toy-tap-button,
 .toy-play-button {
   padding: 16px 32px;
@@ -615,34 +572,6 @@ html, body {
 .toy-tap-button:active,
 .toy-play-button:active {
   background: var(--button-active);
-}
-
-.toy-stack-wrapper {
-  text-align: center;
-}
-
-.toy-stack {
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  gap: 6px;
-  margin: 16px auto;
-}
-
-.toy-stack-block {
-  width: 160px;
-  padding: 14px;
-  border-radius: 8px;
-  border: 2px solid var(--accent-border);
-  background: var(--button-bg);
-  color: var(--ink);
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.toy-stack-block.added {
-  background: var(--accent);
-  color: var(--ink);
 }
 
 .toy-clear-button {
