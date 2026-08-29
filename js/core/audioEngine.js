@@ -98,7 +98,6 @@ herdSynths.six.volume.value = -15;
 
 let audioReady = false;
 let proximityPlaying = false;
-let stepPlaying = false;
 let baaPaused = false;
 
 let beatBpm = DEFAULT_BEAT_BPM;
@@ -210,12 +209,6 @@ export function getRhythmStepIndex() {
   return rhythmStepIndex;
 }
 
-export function getRhythmStepPhase() {
-  const stepDuration = (60 / rhythmBpm) / 4;
-  const elapsed = beatContextTime() - lastRhythmStepTime;
-  return Math.min(1, Math.max(0, elapsed / stepDuration));
-}
-
 export function isAudioReady() {
   return audioReady;
 }
@@ -224,6 +217,14 @@ export async function initAudio() {
   if (audioReady) return;
   await Tone.start();
   audioReady = true;
+  // Players start loading their MP3s as soon as this module is imported, but
+  // on a slower connection (mobile networks especially) they may not have
+  // finished decoding by the moment the tap-to-start gesture unlocks audio.
+  // Wait for every registered buffer to actually be ready before the first
+  // playback attempt, rather than firing safeStart() into a still-empty
+  // buffer with no retry - that left backtrack silent for the whole session
+  // on slower loads.
+  await Tone.loaded();
   safeStart(backtrack);
   startBeatClock();
   setInterval(playBaa, BAA_INTERVAL_MS);
@@ -281,10 +282,6 @@ export function setBeatAudible(audible) {
   beatAudible = audible;
 }
 
-export function isBacktrackAudible() {
-  return audioReady && !ambientBus.mute && backtrack.volume.value > -50;
-}
-
 export function restoreBacktrack() {
   backtrack.volume.rampTo(BACKTRACK_VOLUME, 0.3);
 }
@@ -314,12 +311,16 @@ export function resumeBaa() {
 
 export function setWalking(isWalking) {
   if (!audioReady) return;
-  if (isWalking && !stepPlaying) {
-    safeStart(stepPlayer);
-    stepPlaying = true;
-  } else if (!isWalking && stepPlaying) {
+  // Checks the player's own state rather than trusting a separately-tracked
+  // flag: if the buffer wasn't loaded yet the first time this ran, safeStart
+  // would silently no-op, but the old flag still latched to "playing" and
+  // never tried again for the rest of the session. This is called every
+  // frame while walking, so reading .state each time self-heals as soon as
+  // the buffer finishes loading instead of staying silent forever.
+  if (isWalking) {
+    if (stepPlayer.state !== 'started') safeStart(stepPlayer);
+  } else if (stepPlayer.state === 'started') {
     safeStop(stepPlayer);
-    stepPlaying = false;
   }
 }
 

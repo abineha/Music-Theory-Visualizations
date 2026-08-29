@@ -1,11 +1,5 @@
 import { duckBacktrack, restoreBacktrack, pauseBacktrack, resumeBacktrack, setWalking, pauseBaa, resumeBaa } from '../core/audioEngine.js';
 import { markVisited, markUnvisited, isVisited } from '../core/progress.js';
-import { renderNotation } from './notation.js';
-import { renderKeyboard } from './instruments/keyboard.js';
-import { renderDrumPad } from './instruments/drumPad.js';
-import { renderSliderToy } from './toys/sliderToy.js';
-import { renderKeyboardHighlightToy } from './toys/keyboardHighlightToy.js';
-import { renderStackingToy } from './toys/stackingToy.js';
 import { renderIntervalsToy, stopIntervalsToy } from './toys/intervalsToy.js';
 import { renderNoteWheelToy, stopNoteWheelToy } from './toys/noteWheelToy.js';
 import { renderHopTrailToy, stopHopTrailToy } from './toys/hopTrailToy.js';
@@ -14,7 +8,6 @@ import { renderMinorScaleToy, stopMinorScaleToy } from './toys/minorScaleToy.js'
 import { renderBuildingChordsToy, stopBuildingChordsToy } from './toys/buildingChordsToy.js';
 import { renderChordProgressionsToy, stopChordProgressionsToy } from './toys/chordProgressionsToy.js';
 import { renderSullysStudioToy, stopSullysStudioToy } from './toys/sullysStudioToy.js';
-import { renderQuiz } from './quiz.js';
 import { renderBeatArcToy, stopBeatArcToy } from './toys/beatArcToy.js';
 import { renderRhythmStackToy, stopRhythmStackToy } from './toys/rhythmStackToy.js';
 import { renderMountainToy, stopMountainToy } from './toys/mountainToy.js';
@@ -28,8 +21,18 @@ const closeButton = document.getElementById('popup-close');
 const tabs = document.querySelectorAll('.popup-tab');
 const panels = document.querySelectorAll('.popup-panel-body');
 const toyContainer = document.getElementById('toy-container');
+const notationContainer = document.getElementById('notation-canvas');
+const instrumentContainer = document.getElementById('instrument-container');
 const quizContainer = document.getElementById('quiz-container');
 const completeButton = document.getElementById('popup-complete');
+
+// Definition, Notation, Instrument, and Quiz are future scope - not yet
+// built - so those tabs show a static placeholder for every concept
+// rather than the partial per-concept content they used to render.
+definitionEl.textContent = 'Coming Soon!';
+notationContainer.textContent = 'Coming Soon!';
+instrumentContainer.textContent = 'Coming Soon!';
+quizContainer.textContent = 'Coming Soon!';
 
 let open = false;
 
@@ -56,33 +59,13 @@ tabs.forEach((tab) => {
   });
 });
 
-const instrumentContainer = document.getElementById('instrument-container');
-
-function renderInstrument(concept) {
-  if (!concept.instrument) {
-    instrumentContainer.innerHTML = 'No instrument for this concept yet.';
-    return;
-  }
-  if (concept.instrument.type === 'keyboard') {
-    renderKeyboard(instrumentContainer, concept.instrument);
-  } else if (concept.instrument.type === 'drumpad') {
-    renderDrumPad(instrumentContainer);
-  }
-}
-
 function renderToy(concept) {
   if (!concept.toy) {
     toyContainer.innerHTML = 'No toy for this concept yet.';
     return;
   }
   const { type, config } = concept.toy;
-  if (type === 'slider-toy') {
-    renderSliderToy(toyContainer, config);
-  } else if (type === 'keyboard-highlight-toy') {
-    renderKeyboardHighlightToy(toyContainer, config);
-  } else if (type === 'stacking-toy') {
-    renderStackingToy(toyContainer, config);
-  } else if (type === 'beat-arc-toy') {
+  if (type === 'beat-arc-toy') {
     renderBeatArcToy(toyContainer, config);
   } else if (type === 'herd-stack-toy') {
     renderRhythmStackToy(toyContainer, config);
@@ -130,11 +113,7 @@ completeButton.addEventListener('click', () => {
 export function openPopup(concept) {
   currentConcept = concept;
   titleEl.textContent = concept.title;
-  definitionEl.textContent = concept.definition;
-  renderNotation(concept);
-  renderInstrument(concept);
   renderToy(concept);
-  renderQuiz(quizContainer, concept);
   refreshCompleteButton(concept);
   overlay.classList.remove('hidden');
   open = true;

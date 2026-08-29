@@ -38,6 +38,7 @@ const pitches = () => {
 };
 
 export function stopHopTrailToy() {
+  if (ctx) { ctx.close(); ctx = null; master = null; }
   if (hlRafId !== null) { cancelAnimationFrame(hlRafId); hlRafId = null; }
   cancelAnimationFrame(progRAF);
   voices.forEach((o) => { try { o.stop(); } catch (e) {} });

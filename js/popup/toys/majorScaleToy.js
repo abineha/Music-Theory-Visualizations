@@ -36,6 +36,7 @@ function frameFor(ps) {
 const stoneR = (f) => Math.max(11, Math.min(23, UX * f.kx * 0.34));
 
 export function stopMajorScaleToy() {
+  if (ctx) { ctx.close(); ctx = null; master = null; }
   if (hlRafId !== null) { cancelAnimationFrame(hlRafId); hlRafId = null; }
   cancelAnimationFrame(progRAF);
   voices.forEach((o) => { try { o.stop(); } catch (e) {} });

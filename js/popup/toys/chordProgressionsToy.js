@@ -50,6 +50,7 @@ function planVoices() {
 const gapFor = (a, b) => GAPS[shared(a, b).length] ?? 72;
 
 export function stopChordProgressionsToy() {
+  if (ctx) { ctx.close(); ctx = null; master = null; }
   if (cuesRafId !== null) { cancelAnimationFrame(cuesRafId); cuesRafId = null; }
   if (loopRafId !== null) { cancelAnimationFrame(loopRafId); loopRafId = null; }
   cancelAnimationFrame(progRAF);
