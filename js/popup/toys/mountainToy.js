@@ -40,6 +40,8 @@ let facing = false; // false = facing right (climbing), true = facing left (desc
 let numbersShown = false;
 let pendingTimeouts = [];
 let keydownListener = null;
+let busy = false;
+let progRAF = null;
 
 export function stopMountainToy() {
   pendingTimeouts.forEach((id) => clearTimeout(id));
@@ -48,9 +50,11 @@ export function stopMountainToy() {
     window.removeEventListener('keydown', keydownListener);
     keydownListener = null;
   }
+  cancelAnimationFrame(progRAF);
   idx = 0;
   facing = false;
   numbersShown = false;
+  busy = false;
 }
 
 export function renderMountainToy(container, config = {}) {
@@ -337,12 +341,47 @@ export function renderMountainToy(container, config = {}) {
     updateTheory();
   }
 
+  // Prevents overlapping/garbled playback and animation if the up/down/ledge
+  // controls are spammed while the Auto or Octave button's own timed
+  // sequence is mid-flight: any manual step defensively cancels a running
+  // sequence first, the same way hopTrailToy's hop() calls stopAll().
   function go(i) {
+    if (busy) {
+      pendingTimeouts.forEach((id) => clearTimeout(id));
+      pendingTimeouts = [];
+      clearProgress();
+      busy = false;
+      updateButtons();
+    }
     const n = Math.max(0, Math.min(N - 1, i));
     if (n !== idx) facing = n < idx;
     idx = n;
     render();
     playNote(idx);
+  }
+
+  function updateButtons() {
+    downButton.disabled = busy;
+    upButton.disabled = busy;
+    autoButton.disabled = busy;
+    octaveButton.disabled = busy;
+  }
+
+  function runProgress(btn, durMs) {
+    const t0 = performance.now();
+    btn.classList.add('loading');
+    cancelAnimationFrame(progRAF);
+    (function step() {
+      const k = Math.min(1, (performance.now() - t0) / durMs);
+      btn.style.setProperty('--prog', k.toFixed(3));
+      if (k < 1) progRAF = requestAnimationFrame(step);
+      else { btn.classList.remove('loading'); btn.style.removeProperty('--prog'); }
+    })();
+  }
+
+  function clearProgress() {
+    cancelAnimationFrame(progRAF);
+    [autoButton, octaveButton].forEach((b) => { b.classList.remove('loading'); b.style.removeProperty('--prog'); });
   }
 
   render();
@@ -357,10 +396,13 @@ export function renderMountainToy(container, config = {}) {
   upButton.addEventListener('click', () => go(idx + 1));
 
   autoButton.addEventListener('click', () => {
-    pendingTimeouts.forEach((id) => clearTimeout(id));
-    pendingTimeouts = [];
+    if (busy) return;
+    busy = true;
+    updateButtons();
 
     const sequence = [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1, 0];
+    const totalMs = sequence.length * AUTO_CLIMB_STEP_MS;
+    runProgress(autoButton, totalMs);
     sequence.forEach((i, step) => {
       const id = setTimeout(() => {
         facing = step > 7;
@@ -370,11 +412,19 @@ export function renderMountainToy(container, config = {}) {
       }, step * AUTO_CLIMB_STEP_MS);
       pendingTimeouts.push(id);
     });
+    pendingTimeouts.push(setTimeout(() => {
+      busy = false;
+      updateButtons();
+    }, totalMs));
   });
 
   octaveButton.addEventListener('click', () => {
-    pendingTimeouts.forEach((id) => clearTimeout(id));
-    pendingTimeouts = [];
+    if (busy) return;
+    busy = true;
+    updateButtons();
+    const totalMs = 2700;
+    runProgress(octaveButton, totalMs);
+
     facing = false;
     idx = 0;
     render();
@@ -393,7 +443,9 @@ export function renderMountainToy(container, config = {}) {
     }, 1700));
     pendingTimeouts.push(setTimeout(() => {
       render();
-    }, 2700));
+      busy = false;
+      updateButtons();
+    }, totalMs));
   });
 
   numbersButton.addEventListener('click', () => {
