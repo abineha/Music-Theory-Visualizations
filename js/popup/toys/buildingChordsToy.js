@@ -38,6 +38,7 @@ const nameAt = (i) => L[(root + i) % 12];
 const sky = () => SKY[shape() ? shape().sky : 'none'];
 
 export function stopBuildingChordsToy() {
+  if (ctx) { ctx.close(); ctx = null; master = null; }
   if (cuesRafId !== null) { cancelAnimationFrame(cuesRafId); cuesRafId = null; }
   if (loopRafId !== null) { cancelAnimationFrame(loopRafId); loopRafId = null; }
   cancelAnimationFrame(progRAF);

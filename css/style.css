@@ -2840,6 +2840,19 @@ html, body {
 #ssApp button.big.on { background: #D9D0EC; }
 #ssApp button.big.hidden { display: none; }
 
+#ssApp .length-label {
+  font: inherit; font-weight: bold; font-size: clamp(12px, 1.7vh, 15px);
+  padding: clamp(5px, 0.8vh, 8px) clamp(10px, 1.6vw, 16px); border: 3px solid var(--ss-ink);
+  border-radius: 999px; background: var(--ss-wool); color: var(--ss-ink);
+  display: inline-flex; align-items: center; gap: 6px;
+  box-shadow: 0 3px 0 var(--ss-ink);
+}
+#ssApp .length-label.hidden { display: none; }
+#ssApp .length-label select {
+  font: inherit; font-weight: bold; border: none; background: transparent; color: var(--ss-ink);
+  cursor: pointer;
+}
+
 #ssApp button.nav {
   font: inherit; font-weight: bold; font-size: clamp(14px, 2vh, 18px);
   width: clamp(32px, 4.4vh, 42px); height: clamp(32px, 4.4vh, 42px);

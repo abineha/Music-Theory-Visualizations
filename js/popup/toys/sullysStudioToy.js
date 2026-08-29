@@ -150,12 +150,20 @@ function encodeWav(buffer) {
   }
   return ab;
 }
-async function renderWav(s) {
+async function renderWav(s, loopToSecs) {
   const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
   const sr = 44100;
-  const off = new OC(2, Math.ceil((songSecs(s) + 2.2) * sr), sr);
+  const oneLoopSecs = songSecs(s);
+  const totalSecs = loopToSecs || (oneLoopSecs + 2.2);
+  const off = new OC(2, Math.ceil(totalSecs * sr), sr);
   const dest = buildGraph(off);
-  scheduleSong(off, dest, s, 0);
+  if (loopToSecs) {
+    for (let t0 = 0; t0 < loopToSecs; t0 += oneLoopSecs) {
+      scheduleSong(off, dest, s, t0);
+    }
+  } else {
+    scheduleSong(off, dest, s, 0);
+  }
   const rendered = await off.startRendering();
   return encodeWav(rendered);
 }
@@ -168,9 +176,10 @@ const ROOMS = {
        lines: ['Now Sully can sing.', 'Higher up the wall, higher the sound.'] },
   3: { title: 'The Chord Hut', pitchRows: 7, buttons: ['play', 'bush'],
        lines: ['A bush is three notes at once.', 'Tap Bush, then tap the wall to plant one.'] },
-  4: { title: 'The Song Hut', pitchRows: 7, buttons: ['play', 'bush', 'weather', 'shelf', 'home'],
+  4: { title: 'The Song Hut', pitchRows: 7, buttons: ['play', 'bush', 'weather', 'shelf', 'length', 'home'],
        lines: ['Your song can be twice as long.', 'Keep it, or take it home.'] },
 };
+const LENGTH_OPTIONS = [15, 30, 45, 60];
 const WEATHER_ORDER = ['sunny', 'misty', 'open'];
 const WEATHER_LABEL = { sunny: 'Sunny', misty: 'Misty', open: 'Open' };
 
@@ -220,6 +229,7 @@ const PAD = 6;
 
 export function stopSullysStudioToy() {
   playing = false;
+  if (ctx) { ctx.close(); ctx = null; master = null; }
   if (tickTimer !== null) { clearTimeout(tickTimer); tickTimer = null; }
   if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
   if (roId !== null) { roId.disconnect(); roId = null; }
@@ -262,6 +272,11 @@ export function renderSullysStudioToy(container, config = {}) {
     <button class="big" id="bBush">Bush</button>
     <button class="big" id="bWeather">Sunny</button>
     <button class="big" id="bShelf">The Shelf</button>
+    <label class="big length-label" id="bLengthWrap" for="bLength">Length
+      <select id="bLength" aria-label="How long should the download be?">
+        ${LENGTH_OPTIONS.map((n) => `<option value="${n}"${n === 30 ? ' selected' : ''}>${n}s</option>`).join('')}
+      </select>
+    </label>
     <button class="big" id="bHome">Take it home</button>
     <button class="nav" id="bNext" aria-label="Next room">&rarr;</button>
   </div>
@@ -559,12 +574,13 @@ export function renderSullysStudioToy(container, config = {}) {
     const before = btn.textContent;
     btn.textContent = 'Wrapping it up…';
     try {
-      const wavBuf = await renderWav(song);
+      const loopToSecs = Number($('bLength').value);
+      const wavBuf = await renderWav(song, loopToSecs);
       const blob = new Blob([wavBuf], { type: 'audio/wav' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `sullys-song-${song.seed.toString(36)}.wav`;
+      a.download = `sullys-song-${song.seed.toString(36)}-${loopToSecs}s.wav`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -583,8 +599,8 @@ export function renderSullysStudioToy(container, config = {}) {
     $('roomTitle').textContent = room.title;
     $('roomBadge').textContent = `room ${song.room} of 4`;
     $('roomLines').innerHTML = room.lines.join('<br>');
-    ['bBush', 'bWeather', 'bShelf', 'bHome'].forEach((id) => {
-      const key = { bBush: 'bush', bWeather: 'weather', bShelf: 'shelf', bHome: 'home' }[id];
+    ['bBush', 'bWeather', 'bShelf', 'bLengthWrap', 'bHome'].forEach((id) => {
+      const key = { bBush: 'bush', bWeather: 'weather', bShelf: 'shelf', bLengthWrap: 'length', bHome: 'home' }[id];
       $(id).classList.toggle('hidden', !room.buttons.includes(key));
     });
     $('bWeather').textContent = WEATHER_LABEL[song.weather];

@@ -25,6 +25,7 @@ let walkFrameOn = false, lastWalkFrameTime = 0;
 let keydownListener = null;
 
 export function stopNoteWheelToy() {
+  if (ctx) { ctx.close(); ctx = null; master = null; }
   if (rafId !== null) {
     cancelAnimationFrame(rafId);
     rafId = null;

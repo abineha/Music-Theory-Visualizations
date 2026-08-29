@@ -43,6 +43,7 @@ const STOPS = (() => {
 })();
 
 export function stopIntervalsToy() {
+  if (ctx) { ctx.close(); ctx = null; master = null; }
   if (cuesRafId !== null) { cancelAnimationFrame(cuesRafId); cuesRafId = null; }
   if (loopRafId !== null) { cancelAnimationFrame(loopRafId); loopRafId = null; }
   cancelAnimationFrame(progRAF);
