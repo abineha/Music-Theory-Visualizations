@@ -259,9 +259,6 @@ html, body {
 }
 
 .popup-panel {
-  /* Mild pastel palette (accessibility pass): soft cream ground, warm-brown
-     ink for text (never pure black), muted pastel gold/green/coral accents.
-     Every toy/quiz/instrument widget inside the popup reads off these vars. */
   --ink: #6b5d52;
   --ink-soft: #9c8d80;
   --bg: #faf5ee;
@@ -287,6 +284,17 @@ html, body {
   border-radius: 16px;
   overflow: hidden;
   color: var(--ink);
+
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.popup-panel button,
+.popup-panel svg,
+.popup-panel canvas,
+.popup-panel input[type="range"] {
+  touch-action: none;
 }
 
 .popup-close {
@@ -439,6 +447,22 @@ html, body {
   overflow-y: auto;
 }
 
+@media (max-width: 700px) {
+   .popup-sidebar {
+    width: 84px;
+  }
+  .popup-tab {
+    padding: 12px 6px;
+    font-size: 0.74rem;
+  }
+  .popup-content {
+    padding: 18px 14px;
+  }
+  .popup-complete {
+    display: none;
+  }
+}
+
 .popup-panel-body {
   display: none;
   font-size: 0.95rem;
@@ -447,6 +471,10 @@ html, body {
 
 .popup-panel-body.active {
   display: block;
+}
+
+#toy-container {
+  overflow: hidden;
 }
 
 .visually-hidden {
@@ -2668,13 +2696,16 @@ html, body {
   --ss-ink: #2B241D;
   --ss-wool: #F7F4ED;
   --ss-amber: #EFC03F;
+  --studio-bg: #85C278;
+  --studio-tile: #90C884;
 
-  background: #85C278;
+  background: var(--studio-bg);
   background-image:
-    linear-gradient(45deg, #90C884 25%, transparent 25%, transparent 75%, #90C884 75%),
-    linear-gradient(45deg, #90C884 25%, transparent 25%, transparent 75%, #90C884 75%);
+    linear-gradient(45deg, var(--studio-tile) 25%, transparent 25%, transparent 75%, var(--studio-tile) 75%),
+    linear-gradient(45deg, var(--studio-tile) 25%, transparent 25%, transparent 75%, var(--studio-tile) 75%);
   background-size: 64px 64px;
   background-position: 0 0, 32px 32px;
+  transition: background-color .5s ease;
   font-family: "Trebuchet MS", system-ui, sans-serif;
   color: var(--ss-ink);
   border: 5px solid var(--ss-ink);
@@ -2698,6 +2729,20 @@ html, body {
 }
 #ssApp #roomLines { font-size: clamp(11px, 1.7vh, 15px); opacity: .78; margin-top: 3px; line-height: 1.4; }
 
+#ssApp #legend {
+  display: flex; justify-content: center; align-items: center; gap: 12px;
+  margin-top: 5px; font-size: clamp(10px, 1.4vh, 12px); opacity: .85;
+}
+#ssApp #legend.hidden { display: none; }
+#ssApp .legend-item { display: inline-flex; align-items: center; gap: 4px; }
+#ssApp .legend-dot {
+  width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+  border: 1.5px solid var(--ss-ink);
+}
+#ssApp .legend-dot--soft { background: #BFE0AE; }
+#ssApp .legend-dot--mid { background: #EFC03F; }
+#ssApp .legend-dot--loud { background: #D8524B; }
+
 #ssApp #stage { position: relative; min-height: 0; max-height: min(300px, 34vh); touch-action: none; padding: 8px 14px; }
 #ssApp #grid { display: block; border-radius: 12px; touch-action: none; cursor: pointer; }
 
@@ -2712,6 +2757,10 @@ html, body {
 #ssApp button.big:disabled { opacity: .4; cursor: default; box-shadow: 0 3px 0 rgba(43, 36, 29, .4); }
 #ssApp #bPlay { background: var(--ss-amber); }
 #ssApp button.big.on { background: #D9D0EC; }
+#ssApp button.loading::after {
+  content: ''; position: absolute; inset: 0; background: rgba(43, 36, 29, .26);
+  transform-origin: left center; transform: scaleX(var(--prog, 0));
+}
 #ssApp button.big.hidden { display: none; }
 
 #ssApp .length-label {

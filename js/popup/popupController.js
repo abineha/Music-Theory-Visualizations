@@ -21,6 +21,7 @@ const closeButton = document.getElementById('popup-close');
 const tabs = document.querySelectorAll('.popup-tab');
 const panels = document.querySelectorAll('.popup-panel-body');
 const toyContainer = document.getElementById('toy-container');
+const toyInner = document.getElementById('toy-inner');
 const notationContainer = document.getElementById('notation-canvas');
 const instrumentContainer = document.getElementById('instrument-container');
 const quizContainer = document.getElementById('quiz-container');
@@ -61,36 +62,36 @@ tabs.forEach((tab) => {
 
 function renderToy(concept) {
   if (!concept.toy) {
-    toyContainer.innerHTML = 'No toy for this concept yet.';
+    toyInner.innerHTML = 'No toy for this concept yet.';
     return;
   }
   const { type, config } = concept.toy;
   if (type === 'beat-arc-toy') {
-    renderBeatArcToy(toyContainer, config);
+    renderBeatArcToy(toyInner, config);
   } else if (type === 'herd-stack-toy') {
-    renderRhythmStackToy(toyContainer, config);
+    renderRhythmStackToy(toyInner, config);
   } else if (type === 'mountain-toy') {
-    renderMountainToy(toyContainer, config);
+    renderMountainToy(toyInner, config);
   } else if (type === 'voice-toy') {
-    renderVoiceToy(toyContainer, config);
+    renderVoiceToy(toyInner, config);
   } else if (type === 'note-wheel-toy') {
-    renderNoteWheelToy(toyContainer, config);
+    renderNoteWheelToy(toyInner, config);
   } else if (type === 'hop-trail-toy') {
-    renderHopTrailToy(toyContainer, config);
+    renderHopTrailToy(toyInner, config);
   } else if (type === 'major-scale-toy') {
-    renderMajorScaleToy(toyContainer, config);
+    renderMajorScaleToy(toyInner, config);
   } else if (type === 'minor-scale-toy') {
-    renderMinorScaleToy(toyContainer, config);
+    renderMinorScaleToy(toyInner, config);
   } else if (type === 'intervals-toy') {
-    renderIntervalsToy(toyContainer, config);
+    renderIntervalsToy(toyInner, config);
   } else if (type === 'building-chords-toy') {
-    renderBuildingChordsToy(toyContainer, config);
+    renderBuildingChordsToy(toyInner, config);
   } else if (type === 'chord-progressions-toy') {
-    renderChordProgressionsToy(toyContainer, config);
+    renderChordProgressionsToy(toyInner, config);
   } else if (type === 'sullys-studio-toy') {
-    renderSullysStudioToy(toyContainer, config);
+    renderSullysStudioToy(toyInner, config);
   } else {
-    toyContainer.innerHTML = 'No toy for this concept yet.';
+    toyInner.innerHTML = 'No toy for this concept yet.';
   }
 }
 
@@ -110,6 +111,29 @@ completeButton.addEventListener('click', () => {
   refreshCompleteButton(currentConcept);
 });
 
+let fitResizeObserver = null;
+function fitToyToViewport() {
+  toyInner.style.transform = 'none';
+  toyContainer.style.height = 'auto';
+  const parent = toyContainer.parentElement;
+  const parentRect = parent.getBoundingClientRect();
+  const parentStyle = getComputedStyle(parent);
+  const padX = parseFloat(parentStyle.paddingLeft) + parseFloat(parentStyle.paddingRight);
+  const padY = parseFloat(parentStyle.paddingTop) + parseFloat(parentStyle.paddingBottom);
+  const availW = parentRect.width - padX;
+  const availH = parentRect.height - padY;
+  const naturalW = toyInner.scrollWidth;
+  const naturalH = toyInner.scrollHeight;
+  if (!availW || !availH || !naturalW || !naturalH) return;
+  const scale = Math.min(1, availW / naturalW, availH / naturalH);
+  if (scale < 0.999) {
+    const offsetX = Math.max(0, (availW - naturalW * scale) / 2);
+    toyInner.style.transformOrigin = 'top left';
+    toyInner.style.transform = `translateX(${offsetX}px) scale(${scale})`;
+    toyContainer.style.height = `${naturalH * scale}px`;
+  }
+}
+
 export function openPopup(concept) {
   currentConcept = concept;
   titleEl.textContent = concept.title;
@@ -118,6 +142,11 @@ export function openPopup(concept) {
   overlay.classList.remove('hidden');
   open = true;
   setActiveSection('toy'); // start on the interactive toy
+  fitToyToViewport();
+  if (!fitResizeObserver) {
+    fitResizeObserver = new ResizeObserver(() => fitToyToViewport());
+    fitResizeObserver.observe(toyContainer.parentElement);
+  }
   setWalking(false);
   pauseBaa();
   if (SILENCE_BACKTRACK.has(concept.id)) {
