@@ -1,3 +1,5 @@
+import { getInteractivePopupVolume, onInteractiveVolumeChange } from '../../core/audioEngine.js';
+
 const NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
 const NATURAL = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1];
 const MAJ_DEG = [0, 2, 4, 5, 7, 9, 11, 12];
@@ -10,8 +12,10 @@ const AXIS_X = 84;
 const WALK_FRAME_MS = 150;
 const SULLY_SIZE = 190;
 
+const BASE_MASTER_GAIN = 0.28;
+
 let start = 60, low = { 2: false, 5: false, 6: false }, rotated = false;
-let ctx = null, master = null, voices = [], timers = [], hlQ = [], busy = false, progRAF = null, hlRafId = null;
+let ctx = null, master = null, volumeUnsub = null, voices = [], timers = [], hlQ = [], busy = false, progRAF = null, hlRafId = null;
 let walkFrame = 1, lastWalkFrameTime = 0;
 let PT = { mine: [], maj: [], rot: [] };
 
@@ -46,6 +50,7 @@ const stoneR = (f) => Math.max(11, Math.min(23, UX * f.kx * 0.34));
 
 export function stopMinorScaleToy() {
   if (ctx) { ctx.close(); ctx = null; master = null; }
+  if (volumeUnsub) { volumeUnsub(); volumeUnsub = null; }
   if (hlRafId !== null) { cancelAnimationFrame(hlRafId); hlRafId = null; }
   cancelAnimationFrame(progRAF);
   voices.forEach((o) => { try { o.stop(); } catch (e) {} });
@@ -254,7 +259,8 @@ export function renderMinorScaleToy(container, config = {}) {
   function ensure() {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = .28; master.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = BASE_MASTER_GAIN * getInteractivePopupVolume(); master.connect(ctx.destination);
+    volumeUnsub = onInteractiveVolumeChange((v) => { if (master) master.gain.value = BASE_MASTER_GAIN * v; });
     const n = Math.floor(ctx.sampleRate * 1.2), b = ctx.createBuffer(2, n, ctx.sampleRate);
     for (let c = 0; c < 2; c++) {
       const a = b.getChannelData(c);

@@ -19,7 +19,6 @@ const startGate = document.getElementById('start-gate');
 let gameStarted = false;
 
 const moveHint = document.getElementById('move-hint');
-let hasClickedToMove = false;
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
@@ -245,10 +244,6 @@ canvas.addEventListener('mousemove', (e) => {
   const hoveredNode = findNodeAtWorldPoint(world.x, world.y);
   canvas.style.cursor = hoveredNode ? 'pointer' : '';
 
-  if (hasClickedToMove) {
-    moveHint.classList.add('hidden');
-    return;
-  }
   moveHint.style.left = `${screenX}px`;
   moveHint.style.top = `${screenY}px`;
   moveHint.classList.remove('hidden');
@@ -273,8 +268,6 @@ canvas.addEventListener('click', (e) => {
   }
 
   setGoatTarget(world.x, world.y);
-  hasClickedToMove = true;
-  moveHint.classList.add('hidden');
 });
 
 const zoomSlider = document.getElementById('zoom-slider');

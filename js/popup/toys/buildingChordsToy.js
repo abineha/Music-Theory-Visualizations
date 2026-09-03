@@ -1,3 +1,5 @@
+import { getInteractivePopupVolume, onInteractiveVolumeChange } from '../../core/audioEngine.js';
+
 const L = ['C', 'C\u266F', 'D', 'D\u266F', 'E', 'F', 'F\u266F', 'G', 'G\u266F', 'A', 'A\u266F', 'B'];
 const NAT = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1];
 const SHAPES = {
@@ -23,9 +25,11 @@ const SKY = {
   none: { a: '#C5C7C2', b: '#DCDDD9', ground: '#A9B79E', paper: '#F1F0EB', up: '#B03A34', dn: '#4A3C86', ink: '#2B241D' },
 };
 
+const BASE_MASTER_GAIN = 0.26;
+
 let root = 0, mid = 4, hiG = 7, found = new Set(), busy = false, seq = -1, phase = 0;
 let bop = [0, 0, 0], skiesSig = '';
-let ctx = null, master = null, cue = [], progRAF = null;
+let ctx = null, master = null, volumeUnsub = null, cue = [], progRAF = null;
 let cuesRafId = null, loopRafId = null;
 let timers = [];
 let keydownListener = null;
@@ -39,6 +43,7 @@ const sky = () => SKY[shape() ? shape().sky : 'none'];
 
 export function stopBuildingChordsToy() {
   if (ctx) { ctx.close(); ctx = null; master = null; }
+  if (volumeUnsub) { volumeUnsub(); volumeUnsub = null; }
   if (cuesRafId !== null) { cancelAnimationFrame(cuesRafId); cuesRafId = null; }
   if (loopRafId !== null) { cancelAnimationFrame(loopRafId); loopRafId = null; }
   cancelAnimationFrame(progRAF);
@@ -229,7 +234,8 @@ export function renderBuildingChordsToy(container, config = {}) {
   function ensure() {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = .26; master.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = BASE_MASTER_GAIN * getInteractivePopupVolume(); master.connect(ctx.destination);
+    volumeUnsub = onInteractiveVolumeChange((v) => { if (master) master.gain.value = BASE_MASTER_GAIN * v; });
     const n = Math.floor(ctx.sampleRate * 1.3), b = ctx.createBuffer(2, n, ctx.sampleRate);
     for (let c = 0; c < 2; c++) {
       const a = b.getChannelData(c);

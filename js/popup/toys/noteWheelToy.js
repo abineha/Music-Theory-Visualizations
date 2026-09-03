@@ -1,3 +1,5 @@
+import { getInteractivePopupVolume, onInteractiveVolumeChange } from '../../core/audioEngine.js';
+
 const SHARP = ['C', 'C\u266F', 'D', 'D\u266F', 'E', 'F', 'F\u266F', 'G', 'G\u266F', 'A', 'A\u266F', 'B'];
 const FLAT = ['C', 'D\u266D', 'D', 'E\u266D', 'E', 'F', 'G\u266D', 'G', 'A\u266D', 'A', 'B\u266D', 'B'];
 const NATURAL = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1];
@@ -17,15 +19,17 @@ function place(s, b) {
 const NS = 'http://www.w3.org/2000/svg';
 const POOL = 41;
 const WALK_FRAME_MS = 150;
+const BASE_MASTER_GAIN = 0.3;
 
 let pos = 60, shown = 60, bend = 1, bendTarget = 1, quest = null, facing = 'right';
-let ctx = null, master = null;
+let ctx = null, master = null, volumeUnsub = null;
 let rafId = null;
 let walkFrameOn = false, lastWalkFrameTime = 0;
 let keydownListener = null;
 
 export function stopNoteWheelToy() {
   if (ctx) { ctx.close(); ctx = null; master = null; }
+  if (volumeUnsub) { volumeUnsub(); volumeUnsub = null; }
   if (rafId !== null) {
     cancelAnimationFrame(rafId);
     rafId = null;
@@ -241,7 +245,8 @@ export function renderNoteWheelToy(container, config = {}) {
   function ensure() {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = .3; master.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = BASE_MASTER_GAIN * getInteractivePopupVolume(); master.connect(ctx.destination);
+    volumeUnsub = onInteractiveVolumeChange((v) => { if (master) master.gain.value = BASE_MASTER_GAIN * v; });
     const n = Math.floor(ctx.sampleRate * 1.3), buf = ctx.createBuffer(2, n, ctx.sampleRate);
     for (let c = 0; c < 2; c++) {
       const a = buf.getChannelData(c);
