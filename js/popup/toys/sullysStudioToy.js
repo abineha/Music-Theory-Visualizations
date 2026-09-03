@@ -1,12 +1,10 @@
 /* engine (data model + pure playback)*/
-const SONG_V = 2;
 const SCALES = { sunny: [0, 2, 4, 5, 7, 9, 11], misty: [0, 2, 3, 5, 7, 8, 10], open: [0, 2, 4, 7, 9] };
 const VEL = [0.35, 0.65, 0.95];
 const BUSH = [0, 2, 4];
 
 function blank() {
   return {
-    v: SONG_V,
     name: 'My song',
     seed: (Math.random() * 2 ** 32) >>> 0,
     room: 1,
@@ -15,7 +13,6 @@ function blank() {
     tempo: 104,
     steps: 16,
     subdiv: 4,
-    terrain: 'grass',
     melody: [],
     drums: [],
     presetsApplied: [],
@@ -33,7 +30,7 @@ function rows(lowSteps, highSteps) {
   return [...lowSteps.map((step) => ({ step, row: 0 })), ...highSteps.map((step) => ({ step, row: 1 }))];
 }
 function notesFrom(pairs) {
-  return pairs.map(([step, deg]) => ({ step, deg, len: 1, vel: 1 }));
+  return pairs.map(([step, deg]) => ({ step, deg, len: 1, vel: 1, voice: 'melody' }));
 }
 const PRESETS = {
   1: { drums: rows([0, 4, 8, 12], [4, 12]) },
@@ -42,12 +39,12 @@ const PRESETS = {
   4: { double: true },
 };
 
-function addNote(song, step, deg, len = 1, vel = 1) {
+function addNote(song, step, deg, len = 1, vel = 1, voice = 'melody') {
   song.melody = song.melody.filter((n) => !(n.step === step && n.deg === deg));
-  song.melody.push({ step, deg, len, vel });
+  song.melody.push({ step, deg, len, vel, voice });
 }
 function addBush(song, step, rootDeg) {
-  BUSH.forEach((k) => addNote(song, step, rootDeg + k));
+  BUSH.forEach((k) => addNote(song, step, rootDeg + k, 1, 1, 'chord'));
 }
 
 function applyPreset(song, n) {
@@ -83,26 +80,62 @@ function buildGraph(ctx) {
   master.connect(rev);
   return master;
 }
-const PARTIALS = [[1, 1, 1], [2, .42, .7], [3, .23, .54], [4, .13, .43], [5, .07, .35], [6, .045, .29]];
-function playNote(ctx, dest, terrain, midi, when, dur, vel) {
+
+const PARTIALS = [[1, 1, 1], [2, .42, .7], [3, .23, .54], [4, .13, .43]];
+const tickBufferCache = new WeakMap();
+function getTickBuffer(ctx) {
+  let buf = tickBufferCache.get(ctx);
+  if (!buf) {
+    const len = Math.floor(ctx.sampleRate * .035);
+    buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4);
+    tickBufferCache.set(ctx, buf);
+  }
+  return buf;
+}
+function playNote(ctx, dest, midi, when, vel, voice = 'melody') {
+  const isChord = voice === 'chord';
   const f0 = 440 * Math.pow(2, (midi - 69) / 12), br = Math.pow(261.6 / f0, .45);
-  const vg = ctx.createGain(); vg.gain.value = .32 * vel; vg.connect(dest);
+
+  const ring = (isChord ? 0.85 : 0.55) * br;
+
+  const vg = ctx.createGain(); vg.gain.value = .58 * vel * (isChord ? 0.68 : 1);
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass';
+  const topFreq = isChord ? 1600 : 3600;
+  lp.frequency.setValueAtTime(topFreq, when);
+  lp.frequency.exponentialRampToValueAtTime(Math.max(500, topFreq * 0.32), when + ring + .05);
+  lp.Q.value = isChord ? 0.4 : 0.55;
+  vg.connect(lp); lp.connect(dest);
+
+  const stretch = isChord ? 0.0003 : 0.0009;
   PARTIALS.forEach(([h, lv, dk]) => {
     const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'sine'; o.frequency.setValueAtTime(f0 * h * (1 + .0004 * h * h), when);
+    o.type = isChord ? 'triangle' : 'sine';
+    o.frequency.setValueAtTime(f0 * h * (1 + stretch * h * h), when);
     g.gain.setValueAtTime(.0001, when);
     g.gain.exponentialRampToValueAtTime(Math.max(lv * .5, .0008), when + .005);
-    g.gain.exponentialRampToValueAtTime(.0001, when + dur * dk * br + .05);
-    o.connect(g); g.connect(vg); o.start(when); o.stop(when + dur + .4);
+    g.gain.exponentialRampToValueAtTime(.0001, when + ring * dk + .05);
+    o.connect(g); g.connect(vg); o.start(when); o.stop(when + ring + .4);
   });
+
+  const tickSrc = ctx.createBufferSource(); tickSrc.buffer = getTickBuffer(ctx);
+  const tickFilt = ctx.createBiquadFilter();
+  tickFilt.type = 'bandpass'; tickFilt.frequency.setValueAtTime(f0 * 3.2, when); tickFilt.Q.value = 2.2;
+  const tickGain = ctx.createGain();
+  tickGain.gain.setValueAtTime(isChord ? 0.02 : 0.05, when);
+  tickGain.gain.exponentialRampToValueAtTime(.0001, when + .035);
+  tickSrc.connect(tickFilt); tickFilt.connect(tickGain); tickGain.connect(vg); tickSrc.start(when);
 }
+
 function playDrum(ctx, dest, row, when) {
   if (row === 0) {
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.type = 'sine';
     o.frequency.setValueAtTime(150, when);
     o.frequency.exponentialRampToValueAtTime(45, when + 0.12);
-    g.gain.setValueAtTime(0.9, when);
+    g.gain.setValueAtTime(0.38, when);
     g.gain.exponentialRampToValueAtTime(0.001, when + 0.28);
     o.connect(g); g.connect(dest); o.start(when); o.stop(when + 0.3);
   } else {
@@ -112,7 +145,7 @@ function playDrum(ctx, dest, row, when) {
     const src = ctx.createBufferSource(); src.buffer = buf;
     const filt = ctx.createBiquadFilter(); filt.type = 'bandpass'; filt.frequency.value = 1500; filt.Q.value = 1.2;
     const g = ctx.createGain();
-    g.gain.setValueAtTime(0.7, when); g.gain.exponentialRampToValueAtTime(0.001, when + 0.18);
+    g.gain.setValueAtTime(0.26, when); g.gain.exponentialRampToValueAtTime(0.001, when + 0.18);
     src.connect(filt); filt.connect(g); g.connect(dest); src.start(when);
   }
 }
@@ -120,7 +153,7 @@ function scheduleSong(ctx, dest, s, t0, from = 0, to = Infinity) {
   const dt = stepSecs(s);
   for (const n of s.melody)
     if (n.step >= from && n.step < to)
-      playNote(ctx, dest, s.terrain, midiOf(s, n.deg), t0 + (n.step - from) * dt, Math.max(n.len, 1) * dt * 0.94, VEL[n.vel]);
+      playNote(ctx, dest, midiOf(s, n.deg), t0 + (n.step - from) * dt, VEL[n.vel], n.voice || 'melody');
   for (const d of s.drums)
     if (d.step >= from && d.step < to)
       playDrum(ctx, dest, d.row, t0 + (d.step - from) * dt);
@@ -171,29 +204,34 @@ async function renderWav(s, loopToSecs) {
 /* rooms*/
 const ROOMS = {
   1: { title: 'The Drum Hut', pitchRows: 0, buttons: ['play'],
-       lines: ['Tap the squares.', 'Sully plays them over and over.'] },
+       lines: ['Tap a square to add a beat there - tap it again to remove it.', 'Press play - Sully repeats your pattern forever.'] },
   2: { title: 'The Singing Hut', pitchRows: 7, buttons: ['play'],
-       lines: ['Now Sully can sing.', 'Higher up the wall, higher the sound.'] },
+       lines: ['Tap a square for a note - the higher up the wall, the higher it sounds.', 'Tap that same square again to make it louder. A 4th tap removes it.'] },
   3: { title: 'The Chord Hut', pitchRows: 7, buttons: ['play', 'bush'],
-       lines: ['A bush is three notes at once.', 'Tap Bush, then tap the wall to plant one.'] },
+       lines: ['Press Bush, then tap the wall once.', 'That plants 3 notes together at the same time - a chord, not just one note.'] },
   4: { title: 'The Song Hut', pitchRows: 7, buttons: ['play', 'bush', 'weather', 'shelf', 'length', 'home'],
-       lines: ['Your song can be twice as long.', 'Keep it, or take it home.'] },
+       lines: ['Your song can be twice as long now.', 'Keep it on The Shelf, or take it home as a real song file.'] },
 };
 const LENGTH_OPTIONS = [15, 30, 45, 60];
 const WEATHER_ORDER = ['sunny', 'misty', 'open'];
 const WEATHER_LABEL = { sunny: 'Sunny', misty: 'Misty', open: 'Open' };
+const WEATHER_THEME = {
+  sunny: { bg: '#85C278', tile: '#90C884' }, // bright field green - major scale
+  misty: { bg: '#8FA0A6', tile: '#9AABB1' }, // hazy grey-blue - minor scale
+  open:  { bg: '#7FBFDB', tile: '#8FCBE3' }, // open sky blue - pentatonic
+};
 
 /*  undo */
 const MAX_HIST = 50;
 function snapshotContent(s) {
   return {
-    key: s.key, weather: s.weather, tempo: s.tempo, steps: s.steps, subdiv: s.subdiv, terrain: s.terrain,
+    key: s.key, weather: s.weather, tempo: s.tempo, steps: s.steps, subdiv: s.subdiv,
     melody: s.melody.map((n) => ({ ...n })), drums: s.drums.map((d) => ({ ...d })),
   };
 }
 function applySnapshot(s, snap) {
   s.key = snap.key; s.weather = snap.weather; s.tempo = snap.tempo;
-  s.steps = snap.steps; s.subdiv = snap.subdiv; s.terrain = snap.terrain;
+  s.steps = snap.steps; s.subdiv = snap.subdiv;
   s.melody = snap.melody.map((n) => ({ ...n }));
   s.drums = snap.drums.map((d) => ({ ...d }));
 }
@@ -219,7 +257,7 @@ function saveShelf(list) {
 /* module state */
 let song = null;
 let ctx = null, master = null;
-let tickTimer = null, rafId = null, roId = null;
+let tickTimer = null, rafId = null, roId = null, exportProgRAF = null;
 let nextT = 0, curStep = 0, playing = false, visual = [], curVisualStep = -1;
 let bushMode = false;
 let CW = 0, CH = 0, cellW = 0, cellH = 0, totalRows = 0;
@@ -233,6 +271,7 @@ export function stopSullysStudioToy() {
   if (tickTimer !== null) { clearTimeout(tickTimer); tickTimer = null; }
   if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
   if (roId !== null) { roId.disconnect(); roId = null; }
+  if (exportProgRAF !== null) { cancelAnimationFrame(exportProgRAF); exportProgRAF = null; }
   song = null;
   bushMode = false;
   visual = []; curVisualStep = -1;
@@ -253,6 +292,11 @@ export function renderSullysStudioToy(container, config = {}) {
     <h1 id="roomTitle"></h1>
     <span id="roomBadge"></span>
     <p id="roomLines"></p>
+    <div id="legend" class="hidden">
+      <span class="legend-item"><i class="legend-dot legend-dot--soft"></i>soft</span>
+      <span class="legend-item"><i class="legend-dot legend-dot--mid"></i>medium</span>
+      <span class="legend-item"><i class="legend-dot legend-dot--loud"></i>loud</span>
+    </div>
   </div>
   <div id="stage">
     <canvas id="grid"></canvas>
@@ -269,7 +313,7 @@ export function renderSullysStudioToy(container, config = {}) {
     <button class="nav" id="bPrev" aria-label="Previous room">&larr;</button>
     <button class="big" id="bPlay">Off you go, Sully!</button>
     <button class="big" id="bOops">Oops</button>
-    <button class="big" id="bBush">Bush</button>
+    <button class="big" id="bBush" title="Plant a chord: 3 notes at once">Bush</button>
     <button class="big" id="bWeather">Sunny</button>
     <button class="big" id="bShelf">The Shelf</button>
     <label class="big length-label" id="bLengthWrap" for="bLength">Length
@@ -283,9 +327,16 @@ export function renderSullysStudioToy(container, config = {}) {
 </div>`;
 
   const $ = (i) => document.getElementById(i);
+  const ssRoot = $('ssApp');
   const canvas = $('grid');
   const gctx = canvas.getContext('2d');
   const stageEl = $('stage');
+
+  function updateWeatherTheme() {
+    const theme = WEATHER_THEME[song.weather];
+    ssRoot.style.setProperty('--studio-bg', theme.bg);
+    ssRoot.style.setProperty('--studio-tile', theme.tile);
+  }
 
   function degForRow(row) { return (ROOMS[song.room].pitchRows - 1) - row; }
   function isDrumRow(row) { return row >= ROOMS[song.room].pitchRows; }
@@ -416,18 +467,18 @@ export function renderSullysStudioToy(container, config = {}) {
         addBush(song, col, deg);
         bushMode = false;
         updateBushButton();
-        BUSH.forEach((k) => playNote(ctx, master, song.terrain, midiOf(song, deg + k), t, stepSecs(song) * 0.94, VEL[1]));
+        BUSH.forEach((k) => playNote(ctx, master, midiOf(song, deg + k), t, VEL[1], 'chord'));
         commit();
       } else {
         const existing = song.melody.find((n) => n.step === col && n.deg === deg);
         let remaining = null;
         if (!existing) {
           addNote(song, col, deg, 1, 0);
-          playNote(ctx, master, song.terrain, midiOf(song, deg), t, stepSecs(song) * 0.94, VEL[0]);
+          playNote(ctx, master, midiOf(song, deg), t, VEL[0]);
           remaining = song.melody.find((n) => n.step === col && n.deg === deg);
         } else if (existing.vel < 2) {
           existing.vel += 1;
-          playNote(ctx, master, song.terrain, midiOf(song, deg), t, stepSecs(song) * 0.94, VEL[existing.vel]);
+          playNote(ctx, master, midiOf(song, deg), t, VEL[existing.vel]);
           remaining = existing;
         } else {
           song.melody = song.melody.filter((n) => n !== existing);
@@ -513,6 +564,7 @@ export function renderSullysStudioToy(container, config = {}) {
     const i = WEATHER_ORDER.indexOf(song.weather);
     song.weather = WEATHER_ORDER[(i + 1) % WEATHER_ORDER.length];
     $('bWeather').textContent = WEATHER_LABEL[song.weather];
+    updateWeatherTheme();
     commit();
     draw();
   };
@@ -530,12 +582,13 @@ export function renderSullysStudioToy(container, config = {}) {
         const entry = loadShelf().find((e) => String(e.seed) === btn.dataset.seed);
         if (!entry) return;
         song.weather = entry.weather; song.key = entry.key; song.tempo = entry.tempo;
-        song.steps = entry.steps; song.subdiv = entry.subdiv; song.terrain = entry.terrain;
+        song.steps = entry.steps; song.subdiv = entry.subdiv;
         song.melody = entry.melody.map((n) => ({ ...n }));
         song.drums = entry.drums.map((d) => ({ ...d }));
         song.seed = entry.seed;
         commit();
         $('bWeather').textContent = WEATHER_LABEL[song.weather];
+        updateWeatherTheme();
         layout(); draw();
         $('shelfMsg').textContent = 'Loaded!';
       };
@@ -545,7 +598,7 @@ export function renderSullysStudioToy(container, config = {}) {
     const list = loadShelf();
     const entry = {
       seed: song.seed, name: song.name, weather: song.weather, key: song.key, tempo: song.tempo,
-      steps: song.steps, subdiv: song.subdiv, terrain: song.terrain,
+      steps: song.steps, subdiv: song.subdiv,
       melody: song.melody.map((n) => ({ ...n })), drums: song.drums.map((d) => ({ ...d })),
       savedAt: Date.now(),
     };
@@ -567,14 +620,35 @@ export function renderSullysStudioToy(container, config = {}) {
     renderShelf();
   };
 
+  function runExportProgress(btn, estimatedMs) {
+    const t0 = performance.now();
+    const CAP = 0.92;
+    btn.classList.add('loading');
+    cancelAnimationFrame(exportProgRAF);
+    (function step() {
+      const k = Math.min(CAP, (performance.now() - t0) / estimatedMs);
+      btn.style.setProperty('--prog', k.toFixed(3));
+      exportProgRAF = requestAnimationFrame(step);
+    })();
+    return () => {
+      cancelAnimationFrame(exportProgRAF);
+      btn.style.setProperty('--prog', '1');
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        btn.style.removeProperty('--prog');
+      }, 180);
+    };
+  }
+
   $('bHome').onclick = async () => {
     const btn = $('bHome');
     if (btn.disabled) return;
     btn.disabled = true;
     const before = btn.textContent;
     btn.textContent = 'Wrapping it up…';
+    const loopToSecs = Number($('bLength').value);
+    const finishProgress = runExportProgress(btn, Math.max(1500, loopToSecs * 900));
     try {
-      const loopToSecs = Number($('bLength').value);
       const wavBuf = await renderWav(song, loopToSecs);
       const blob = new Blob([wavBuf], { type: 'audio/wav' });
       const url = URL.createObjectURL(blob);
@@ -586,10 +660,14 @@ export function renderSullysStudioToy(container, config = {}) {
       a.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
+      cancelAnimationFrame(exportProgRAF);
+      btn.classList.remove('loading');
+      btn.style.removeProperty('--prog');
       btn.textContent = 'Could not make it — try again';
       setTimeout(() => { btn.textContent = before; btn.disabled = false; }, 1600);
       return;
     }
+    finishProgress();
     btn.textContent = before;
     btn.disabled = false;
   };
@@ -599,11 +677,13 @@ export function renderSullysStudioToy(container, config = {}) {
     $('roomTitle').textContent = room.title;
     $('roomBadge').textContent = `room ${song.room} of 4`;
     $('roomLines').innerHTML = room.lines.join('<br>');
+    $('legend').classList.toggle('hidden', room.pitchRows === 0);
     ['bBush', 'bWeather', 'bShelf', 'bLengthWrap', 'bHome'].forEach((id) => {
       const key = { bBush: 'bush', bWeather: 'weather', bShelf: 'shelf', bLengthWrap: 'length', bHome: 'home' }[id];
       $(id).classList.toggle('hidden', !room.buttons.includes(key));
     });
     $('bWeather').textContent = WEATHER_LABEL[song.weather];
+    updateWeatherTheme();
     $('bPrev').disabled = song.room <= 1;
     $('bNext').disabled = song.room >= 4;
     bushMode = false;
