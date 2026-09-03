@@ -1,3 +1,5 @@
+import { getInteractivePopupVolume, onInteractiveVolumeChange } from '../../core/audioEngine.js';
+
 const NAMES = ['C', 'C\u266F', 'D', 'D\u266F', 'E', 'F', 'F\u266F', 'G', 'G\u266F', 'A', 'A\u266F', 'B'];
 const MIN = 52, MAX = 84, LIMIT = 12;
 const mod = (a, n) => ((a % n) + n) % n, nameOf = (n) => NAMES[mod(n, 12)];
@@ -24,9 +26,11 @@ function frameFor(all) {
 const toXY = (q, f) => ({ x: PADX + (q.u - f.u0) * UX * f.kx, y: f.midY - (q.p - f.pMid) * UY * f.ky });
 const stoneR = (f) => Math.max(9, Math.min(20, UX * f.kx * 0.36));
 
+const BASE_MASTER_GAIN = 0.28;
+
 let start = 60, steps = [], dir = 1, ghost = null;
 let walkFrame = 1;
-let ctx = null, master = null;
+let ctx = null, master = null, volumeUnsub = null;
 let voices = [], timers = [], busy = false, progRAF = null, hlRafId = null, hlQueue = [];
 let seed = Date.now() >>> 0;
 let keydownListener = null;
@@ -39,6 +43,7 @@ const pitches = () => {
 
 export function stopHopTrailToy() {
   if (ctx) { ctx.close(); ctx = null; master = null; }
+  if (volumeUnsub) { volumeUnsub(); volumeUnsub = null; }
   if (hlRafId !== null) { cancelAnimationFrame(hlRafId); hlRafId = null; }
   cancelAnimationFrame(progRAF);
   voices.forEach((o) => { try { o.stop(); } catch (e) {} });
@@ -239,7 +244,8 @@ export function renderHopTrailToy(container, config = {}) {
   function ensure() {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = .28; master.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = BASE_MASTER_GAIN * getInteractivePopupVolume(); master.connect(ctx.destination);
+    volumeUnsub = onInteractiveVolumeChange((v) => { if (master) master.gain.value = BASE_MASTER_GAIN * v; });
     const n = Math.floor(ctx.sampleRate * 1.2), b = ctx.createBuffer(2, n, ctx.sampleRate);
     for (let c = 0; c < 2; c++) {
       const a = b.getChannelData(c);

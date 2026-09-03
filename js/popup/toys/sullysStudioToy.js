@@ -1,4 +1,7 @@
 /* engine (data model + pure playback)*/
+import { getInteractivePopupVolume, onInteractiveVolumeChange } from '../../core/audioEngine.js';
+
+const BASE_MASTER_GAIN = 0.3;
 const SCALES = { sunny: [0, 2, 4, 5, 7, 9, 11], misty: [0, 2, 3, 5, 7, 8, 10], open: [0, 2, 4, 7, 9] };
 const VEL = [0.35, 0.65, 0.95];
 const BUSH = [0, 2, 4];
@@ -67,8 +70,12 @@ function applyPreset(song, n) {
   }
 }
 
-function buildGraph(ctx) {
-  const master = ctx.createGain(); master.gain.value = 0.3; master.connect(ctx.destination);
+// gain defaults to the fixed base level - used as-is by the offline WAV
+// export, which should render at a consistent level regardless of whatever
+// the popup's live monitoring volume happens to be set to. Live playback
+// (ensure(), below) passes an explicit gain instead, tied to that slider.
+function buildGraph(ctx, gain = BASE_MASTER_GAIN) {
+  const master = ctx.createGain(); master.gain.value = gain; master.connect(ctx.destination);
   const n = Math.floor(ctx.sampleRate * 1.3);
   const buf = ctx.createBuffer(2, n, ctx.sampleRate);
   for (let c = 0; c < 2; c++) {
@@ -256,7 +263,7 @@ function saveShelf(list) {
 
 /* module state */
 let song = null;
-let ctx = null, master = null;
+let ctx = null, master = null, volumeUnsub = null;
 let tickTimer = null, rafId = null, roId = null, exportProgRAF = null;
 let nextT = 0, curStep = 0, playing = false, visual = [], curVisualStep = -1;
 let bushMode = false;
@@ -268,6 +275,7 @@ const PAD = 6;
 export function stopSullysStudioToy() {
   playing = false;
   if (ctx) { ctx.close(); ctx = null; master = null; }
+  if (volumeUnsub) { volumeUnsub(); volumeUnsub = null; }
   if (tickTimer !== null) { clearTimeout(tickTimer); tickTimer = null; }
   if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
   if (roId !== null) { roId.disconnect(); roId = null; }
@@ -345,7 +353,8 @@ export function renderSullysStudioToy(container, config = {}) {
   function ensure() {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = buildGraph(ctx);
+    master = buildGraph(ctx, BASE_MASTER_GAIN * getInteractivePopupVolume());
+    volumeUnsub = onInteractiveVolumeChange((v) => { if (master) master.gain.value = BASE_MASTER_GAIN * v; });
   }
 
   function layout() {

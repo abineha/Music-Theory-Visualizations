@@ -1,3 +1,5 @@
+import { getInteractivePopupVolume, onInteractiveVolumeChange } from '../../core/audioEngine.js';
+
 const LETTERS = ['C', 'C\u266F', 'D', 'D\u266F', 'E', 'F', 'F\u266F', 'G', 'G\u266F', 'A', 'A\u266F', 'B'];
 const SPOTS = [
   { x: 1 / 6, pieces: 6, col: '#7C6BAF', dim: '#C9BEE6', semis: 3 },
@@ -13,11 +15,12 @@ const px = (v) => L + (R - L) * v;
 const SULLY_SIZE = 180;
 const WALK_FRAME_MS = 180;
 const T2 = 0.78, T3 = 1.56, END = 3.0;
+const BASE_MASTER_GAIN = 0.3;
 
 let rootIx = 0;
 let x = 0.42, marks = true, lit = new Set(), phase = 0, wobble = 0;
 let seq = null, busy = false, cue = [];
-let ctx = null, master = null;
+let ctx = null, master = null, volumeUnsub = null;
 let walkFrame = 1, facing = 'right';
 let cuesRafId = null, loopRafId = null, progRAF = null;
 let timers = [];
@@ -44,6 +47,7 @@ const STOPS = (() => {
 
 export function stopIntervalsToy() {
   if (ctx) { ctx.close(); ctx = null; master = null; }
+  if (volumeUnsub) { volumeUnsub(); volumeUnsub = null; }
   if (cuesRafId !== null) { cancelAnimationFrame(cuesRafId); cuesRafId = null; }
   if (loopRafId !== null) { cancelAnimationFrame(loopRafId); loopRafId = null; }
   cancelAnimationFrame(progRAF);
@@ -206,7 +210,8 @@ export function renderIntervalsToy(container, config = {}) {
   function ensure() {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = .3; master.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = BASE_MASTER_GAIN * getInteractivePopupVolume(); master.connect(ctx.destination);
+    volumeUnsub = onInteractiveVolumeChange((v) => { if (master) master.gain.value = BASE_MASTER_GAIN * v; });
     const n = Math.floor(ctx.sampleRate * 1.4), b = ctx.createBuffer(2, n, ctx.sampleRate);
     for (let c = 0; c < 2; c++) {
       const a = b.getChannelData(c);

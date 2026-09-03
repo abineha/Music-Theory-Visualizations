@@ -1,4 +1,4 @@
-import { duckBacktrack, restoreBacktrack, pauseBacktrack, resumeBacktrack, setWalking, pauseBaa, resumeBaa } from '../core/audioEngine.js';
+import { duckBacktrack, pauseBacktrack, resumeBacktrack, setWalking, pauseBaa, resumeBaa } from '../core/audioEngine.js';
 import { markVisited, markUnvisited, isVisited } from '../core/progress.js';
 import { renderIntervalsToy, stopIntervalsToy } from './toys/intervalsToy.js';
 import { renderNoteWheelToy, stopNoteWheelToy } from './toys/noteWheelToy.js';
@@ -27,9 +27,7 @@ const instrumentContainer = document.getElementById('instrument-container');
 const quizContainer = document.getElementById('quiz-container');
 const completeButton = document.getElementById('popup-complete');
 
-// Definition, Notation, Instrument, and Quiz are future scope - not yet
-// built - so those tabs show a static placeholder for every concept
-// rather than the partial per-concept content they used to render.
+// Definition, Notation, Instrument, and Quiz are future scope 
 definitionEl.textContent = 'Coming Soon!';
 notationContainer.textContent = 'Coming Soon!';
 instrumentContainer.textContent = 'Coming Soon!';

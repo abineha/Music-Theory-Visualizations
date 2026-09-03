@@ -242,9 +242,19 @@ export function setAmbientVolume(linearVolume) {
   setBusVolume(ambientBus, linearVolume);
 }
 
-// Popup slider - drums, keyboard, and every toy/instrument sound.
+let interactivePopupVolume = 1;
+const interactiveVolumeListeners = new Set();
 export function setInteractiveVolume(linearVolume) {
   setBusVolume(interactiveBus, linearVolume);
+  interactivePopupVolume = linearVolume;
+  interactiveVolumeListeners.forEach((cb) => cb(linearVolume));
+}
+export function getInteractivePopupVolume() {
+  return interactivePopupVolume;
+}
+export function onInteractiveVolumeChange(cb) {
+  interactiveVolumeListeners.add(cb);
+  return () => interactiveVolumeListeners.delete(cb);
 }
 
 export function duckBacktrack() {
@@ -282,10 +292,6 @@ export function setBeatAudible(audible) {
   beatAudible = audible;
 }
 
-export function restoreBacktrack() {
-  backtrack.volume.rampTo(BACKTRACK_VOLUME, 0.3);
-}
-
 export function pauseBacktrack() {
   backtrack.volume.rampTo(-60, 0.25);
   setTimeout(() => { if (backtrack.state === 'started') backtrack.stop(); }, 300);
@@ -311,12 +317,6 @@ export function resumeBaa() {
 
 export function setWalking(isWalking) {
   if (!audioReady) return;
-  // Checks the player's own state rather than trusting a separately-tracked
-  // flag: if the buffer wasn't loaded yet the first time this ran, safeStart
-  // would silently no-op, but the old flag still latched to "playing" and
-  // never tried again for the rest of the session. This is called every
-  // frame while walking, so reading .state each time self-heals as soon as
-  // the buffer finishes loading instead of staying silent forever.
   if (isWalking) {
     if (stepPlayer.state !== 'started') safeStart(stepPlayer);
   } else if (stepPlayer.state === 'started') {

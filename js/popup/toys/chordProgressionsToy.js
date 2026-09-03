@@ -1,3 +1,5 @@
+import { getInteractivePopupVolume, onInteractiveVolumeChange } from '../../core/audioEngine.js';
+
 const L = ['C', 'C\u266F', 'D', 'D\u266F', 'E', 'F', 'F\u266F', 'G', 'G\u266F', 'A', 'A\u266F', 'B'];
 const NAT = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1];
 const SC = [0, 2, 4, 5, 7, 9, 11];
@@ -11,8 +13,10 @@ const BPM = 104, BEAT = 60 / BPM, BAR = BEAT * 4, ROLL = 0.085;
 const SULLY_SIZE = 150;
 const WALK_FRAME_MS = 180;
 
+const BASE_MASTER_GAIN = 0.23;
+
 let key = 0, line = [], fall = [], busy = false, playing = -1, phase = 0;
-let ctx = null, master = null, cue = [], progRAF = null, voices = [];
+let ctx = null, master = null, volumeUnsub = null, cue = [], progRAF = null, voices = [];
 let facing = 'right', walkFrame = 1, lastSx = 40;
 let cuesRafId = null, loopRafId = null;
 let timers = [];
@@ -51,6 +55,7 @@ const gapFor = (a, b) => GAPS[shared(a, b).length] ?? 72;
 
 export function stopChordProgressionsToy() {
   if (ctx) { ctx.close(); ctx = null; master = null; }
+  if (volumeUnsub) { volumeUnsub(); volumeUnsub = null; }
   if (cuesRafId !== null) { cancelAnimationFrame(cuesRafId); cuesRafId = null; }
   if (loopRafId !== null) { cancelAnimationFrame(loopRafId); loopRafId = null; }
   cancelAnimationFrame(progRAF);
@@ -190,7 +195,8 @@ export function renderChordProgressionsToy(container, config = {}) {
   function ensure() {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = .23; master.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = BASE_MASTER_GAIN * getInteractivePopupVolume(); master.connect(ctx.destination);
+    volumeUnsub = onInteractiveVolumeChange((v) => { if (master) master.gain.value = BASE_MASTER_GAIN * v; });
     const n = Math.floor(ctx.sampleRate * 1.5), b = ctx.createBuffer(2, n, ctx.sampleRate);
     for (let c = 0; c < 2; c++) {
       const a = b.getChannelData(c);
